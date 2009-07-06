@@ -1,7 +1,9 @@
-Django compressor
+Django css
 =================
 
-Compresses linked and inline javascript or CSS into a single cached file.
+Django-css is a fork of django_compressor that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS, Sass, CleverCSS, or LESS.
+
+Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
 
 Syntax::
 
@@ -13,11 +15,10 @@ Examples::
 
     {% compress css %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
-    <style type="text/css">p { border:5px solid green;}</style>
-    <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+    <link rel="stylesheet" href="/media/css/two.sass" type="text/css" charset="utf-8">
     {% endcompress %}
 
-Which would be rendered something like::
+Which would be rendered like::
 
     <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
 
@@ -28,71 +29,60 @@ or::
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
     {% endcompress %}
 
-Which would be rendered something like::
+Which would be rendered like::
 
     <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
-If DEBUG is true off-site files will throw exceptions. If DEBUG is false
-they will be silently stripped.
+XHTML::
+If you're using xhtml, you should use:
+    {% compress css xhtml %}
+    <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />
+    <link rel="stylesheet" href="/media/css/two.sass" type="text/css" charset="utf-8" />
+    {% compress css %}
 
-If COMPRESS is False (defaults to the opposite of DEBUG) the compress tag
-simply returns exactly what it was given, to ease development.
+Which would be rendered like::
 
-
-CSS Notes:
-**********
-
-All relative url() bits specified in linked CSS files are automatically
-converted to absolute URLs while being processed. Any local absolute urls (those
-starting with a '/') are left alone.
-
-Stylesheets that are @import'd are not compressed into the main file. They are
-left alone.
-
-Set the media attribute as normal on your <style> and <link> elements and
-the combined CSS will be wrapped in @media blocks as necessary.
-
-**Recomendations:**
-
-* Use only relative or full domain absolute urls in your CSS files.
-* Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
-
-
-Why another static file combiner for django?
-********************************************
-
-Short version: None of them did exactly what I needed.
-
-Long version:
-
-**JS/CSS belong in the templates**
-  Every static combiner for django I've seen makes you configure
-  your static files in your settings.py. While that works, it doesn't make
-  sense. Static files are for display. And it's not even an option if your
-  settings are in completely different repositories and use different deploy
-  processes from the templates that depend on them.
-
-**Flexibility**
-  django_compressor doesn't care if different pages use different combinations
-  of statics. It doesn't care if you use inline scripts or styles. It doesn't
-  get in the way.
-
-**Automatic regeneration and cache-foreverable generated output**
-  Statics are never stale and browsers can be told to cache the output forever.
-
-**Full test suite**
-  I has one.
+    <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8" />
 
 
 Settings
 ********
 
-Django compressor has a number of settings that control it's behavior.
-They've been given sensible defaults.
+`COMPILER_FORMATS` default: {}
+  A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. For example:
+
+    COMPILER_FORMATS = {
+        '.sass': {
+            'binary_path':'sass',
+            'arguments': '*.sass *.css' 
+        },
+        '.hss': {
+            'binary_path':'/home/dziegler/hss',
+            'arguments':'*.hss'
+        }
+        '.ccss': {
+        'binary_path':'clevercss',
+        'arguments': '*.ccss'
+        },
+    }
+  
+  will use Sass to compile *.sass files, HSS to compile *.hss files, and clevercss to compile *.ccss files.
+
+  binary_path is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
+
+  arguments are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
+
+  If this seems a little hacky, it's because I wanted to make it easy to use whatever CSS compiler you want with as little setup as possible. 
+
 
 `COMPRESS` default: the opposite of `DEBUG`
   Boolean that decides if compression will happen.
+
+`COMPRESS_CSS_FILTERS` default: []
+  A list of filters that will be applied to CSS.
+
+`COMPRESS_JS_FILTERS` default: ['compressor.filters.jsmin.JSMinFilter'])
+  A list of filters that will be applied to javascript.
 
 `COMPRESS_URL` default: `MEDIA_URL`
   Controls the URL that linked media will be read from and compressed media
@@ -106,11 +96,30 @@ They've been given sensible defaults.
   Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
   be written to.
 
-`COMPRESS_CSS_FILTERS` default: []
-  A list of filters that will be applied to CSS.
 
-`COMPRESS_JS_FILTERS` default: ['compressor.filters.jsmin.JSMinFilter'])
-  A list of filters that will be applied to javascript.
+Notes:
+**********
+
+All relative url() bits specified in linked CSS files are automatically
+converted to absolute URLs while being processed. Any local absolute urls (those
+starting with a '/') are left alone.
+
+Stylesheets that are @import'd are not compressed into the main file. They are
+left alone.
+
+Set the media attribute as normal on your <style> and <link> elements and
+the combined CSS will be wrapped in @media blocks as necessary.
+
+Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
+If DEBUG is true off-site files will throw exceptions. If DEBUG is false
+they will be silently stripped.
+
+If COMPRESS is False (defaults to the opposite of DEBUG) CSS files will still be compiled, but files will not be compressed and versioned.
+
+**Recomendations:**
+
+* Use only relative or full domain absolute urls in your CSS files.
+* Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
 
 
 Dependecies
