@@ -53,6 +53,7 @@ Settings
 
 `COMPILER_FORMATS` default: `{}`
 A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. 
+
 For example::
 
     COMPILER_FORMATS = {
@@ -77,7 +78,7 @@ binary_path is the path to the CSS compiler. In the above example, sass and clev
 
 arguments are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
 
-  If this seems a little hacky, it's because I wanted to make it easy to use whatever CSS compiler you want with as little setup as possible. 
+If this seems a little hacky, it's because I wanted to make it easy to use whatever CSS compiler you want with as little setup as possible. 
 
 
 `COMPRESS` default: the opposite of `DEBUG`
