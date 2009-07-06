@@ -36,7 +36,7 @@ Which would be rendered like::
 
     <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-If you're using xhtml, you should use:
+If you're using xhtml, you should use::
 
     {% compress css xhtml %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />
@@ -69,7 +69,7 @@ A dictionary specifying the compiler and arguments to associate with each extens
         },
     }
   
- will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
+will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
 
   `binary_path` is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
@@ -118,6 +118,7 @@ If DEBUG is true off-site files will throw exceptions. If DEBUG is false
 they will be silently stripped.
 
 If COMPRESS is False (defaults to the opposite of DEBUG) CSS files will still be compiled, but files will not be compressed and versioned.
+
 
 **Recomendations:**
 
