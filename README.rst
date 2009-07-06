@@ -34,7 +34,9 @@ Which would be rendered like::
     <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
 XHTML::
+
 If you're using xhtml, you should use:
+
     {% compress css xhtml %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />
     <link rel="stylesheet" href="/media/css/two.sass" type="text/css" charset="utf-8" />
@@ -59,18 +61,18 @@ Settings
         '.hss': {
             'binary_path':'/home/dziegler/hss',
             'arguments':'*.hss'
-        }
+        },
         '.ccss': {
         'binary_path':'clevercss',
         'arguments': '*.ccss'
         },
     }
   
-  will use Sass to compile *.sass files, HSS to compile *.hss files, and clevercss to compile *.ccss files.
+  will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
 
-  binary_path is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
+  `binary_path` is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
-  arguments are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
+  `arguments` are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
 
   If this seems a little hacky, it's because I wanted to make it easy to use whatever CSS compiler you want with as little setup as possible. 
 
