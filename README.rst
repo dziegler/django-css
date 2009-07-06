@@ -5,6 +5,9 @@ Django-css is a fork of django_compressor that makes it easy to use CSS compiler
 
 Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
 
+Usage
+*****
+
 Syntax::
 
     {% compress <js/css> %}
@@ -33,8 +36,6 @@ Which would be rendered like::
 
     <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
 
-XHTML::
-
 If you're using xhtml, you should use:
 
     {% compress css xhtml %}
@@ -51,7 +52,7 @@ Settings
 ********
 
 `COMPILER_FORMATS` default: {}
-  A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. For example:
+A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. For example::
 
     COMPILER_FORMATS = {
         '.sass': {
@@ -68,7 +69,7 @@ Settings
         },
     }
   
-  will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
+ will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
 
   `binary_path` is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
@@ -95,7 +96,7 @@ Settings
   compressed media will be written to.
 
 `COMPRESS_OUTPUT_DIR` default: `"CACHE"`
-  Conttrols the directory inside `COMPRESS_ROOT` that compressed files will
+  Controls the directory inside `COMPRESS_ROOT` that compressed files will
   be written to.
 
 
