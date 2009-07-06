@@ -50,8 +50,9 @@ class CompressorTestCase(TestCase):
             self.assert_(is_date.match(str(date)), "mtimes is returning something that doesn't look like a date")
 
     def test_css_return_if_off(self):
+        from textwrap import dedent
         settings.COMPRESS = False
-        self.assertEqual(self.css, self.cssNode.output())
+        self.assertEqual(dedent(self.css).strip(), dedent(self.cssNode.output()).strip())
 
     def test_cachekey(self):
         is_cachekey = re.compile(r'django_compressor\.\w{12}')
@@ -62,7 +63,7 @@ class CompressorTestCase(TestCase):
 
     def test_css_return_if_on(self):
         output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
-        self.assertEqual(output, self.cssNode.output())
+        self.assertEqual(output.strip(), self.cssNode.output().strip())
 
 
     def test_js_split(self):
