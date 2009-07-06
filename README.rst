@@ -51,8 +51,9 @@ Which would be rendered like::
 Settings
 ********
 
-`COMPILER_FORMATS` default: {}
-A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. For example::
+`COMPILER_FORMATS` default: `{}`
+  A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. 
+For example::
 
     COMPILER_FORMATS = {
         '.sass': {
@@ -68,12 +69,13 @@ A dictionary specifying the compiler and arguments to associate with each extens
         'arguments': '*.ccss'
         },
     }
-  
+
+
 will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
 
-  `binary_path` is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
+  binary_path is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
-  `arguments` are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
+  arguments are arguments you would call in the command line to the compiler. The order and format of these will depend on the CSS compiler you use. Prior to compilation, * will be replaced with the name of your file to be compiled.
 
   If this seems a little hacky, it's because I wanted to make it easy to use whatever CSS compiler you want with as little setup as possible. 
 
