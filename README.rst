@@ -1,10 +1,18 @@
 Django css
 =================
 
-Django-css is a fork of django_compressor that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS, Sass, CleverCSS, or LESS.
+Django-css is a fork of django_compressor that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS_, Sass_, CleverCSS_, or LESS_.
+
+.. _HSS: http://ncannasse.fr/projects/hss 
+.. _Sass: http://haml.hamptoncatlin.com/docs/rdoc/classes/Sass.html
+.. _CleverCSS: http://github.com/dziegler/clevercss/tree/master 
+.. _LESS: http://lesscss.org/
 
 Thanks to django_compressor_, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
+
 .. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
+
+Note: The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
 Usage
 *****
@@ -124,6 +132,7 @@ they will be silently stripped.
 
 If COMPRESS is False (defaults to the opposite of DEBUG) CSS files will still be compiled, but files will not be compressed and versioned.
 
+The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
 **Recomendations:**
 
