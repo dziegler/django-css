@@ -1,16 +1,16 @@
 Django css
 =================
 
-Django-css is a fork of django_compressor that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS_, Sass_, CleverCSS_, or LESS_.
+Django-css is a fork of django_compressor_ that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock_ all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS_, Sass_, CleverCSS_, or LESS_.
 
+.. _rock: http://blog.davidziegler.net/post/92203003/css-compilers-rock
 .. _HSS: http://ncannasse.fr/projects/hss 
 .. _Sass: http://haml.hamptoncatlin.com/docs/rdoc/classes/Sass.html
 .. _CleverCSS: http://github.com/dziegler/clevercss/tree/master 
 .. _LESS: http://lesscss.org/
-
-Thanks to django_compressor_, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
-
 .. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
+
+Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
 
 Note: The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
@@ -142,10 +142,15 @@ The pypi version of CleverCSS is buggy and will not work with django-css. Use th
 
 Changes from 1.0.0, aka the version from google code
 ****************************************************
-django-css was previously using django-compress_ for versioning and compression, and it now uses django_compressor_. The switch was made because I found django_compressor to be much more elegant, and simpler to use. The main reasons being that with django_compressor, css/js files are included in the template itself, not in settings, and versioning is much cleaner. Special thanks to Christian Metts and Andreas Pelme for all their hard work on django_compressor and django-compress.
+
+Django-css was previously using django-compress_ for versioning and compression, and it now uses django_compressor_. The main reasons being that with django_compressor, css/js files are included in the template itself, not in settings, and versioning is much cleaner. Version 2 requires much less setup and is easier to use, but is not compatible with version 1.
 
 .. _django-compress: http://code.google.com/p/django-compress/
 .. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
+
+Special thanks to Christian Metts and Andreas Pelme for all their hard work on django_compressor and django-compress.
+
+
 
 
 Dependecies
