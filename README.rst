@@ -52,9 +52,10 @@ Settings
 ********
 
 `COMPILER_FORMATS` default: {}
-  A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. 
+  A dictionary specifying the compiler and arguments to associate with each extension. 
 
-For example::
+
+django-css will select which CSS compiler to use based off a file's extension. For example::
 
     COMPILER_FORMATS = {
         '.sass': {
@@ -72,7 +73,7 @@ For example::
     }
 
 
-will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files.
+will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files. *.css files will be treated like normal css files. 
 
 binary_path is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
