@@ -3,7 +3,8 @@ Django css
 
 Django-css is a fork of django_compressor that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS, Sass, CleverCSS, or LESS.
 
-Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
+Thanks to django_compressor_, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
+.. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
 
 Usage
 *****
