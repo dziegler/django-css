@@ -142,7 +142,7 @@ The pypi version of CleverCSS is buggy and will not work with django-css. Use th
 
 Changes from 1.0.0, aka the version from google code
 ****************************************************
-django-css was previously using django-compress_ for versioning and compression, and it now uses django_compressor_. The switch was made because I found django_compressor_ to be much more elegant, and simpler to use. The main reasons being that with django_compressor_, css/js files are included in the template itself, not in settings, and versioning is much cleaner. Special thanks to Christian Metts and Andreas Pelme for all their hard work on django_compressor_ and django-compress_.
+django-css was previously using django-compress_ for versioning and compression, and it now uses django_compressor_. The switch was made because I found django_compressor to be much more elegant, and simpler to use. The main reasons being that with django_compressor, css/js files are included in the template itself, not in settings, and versioning is much cleaner. Special thanks to Christian Metts and Andreas Pelme for all their hard work on django_compressor and django-compress.
 
 .. _django-compress: http://code.google.com/p/django-compress/
 .. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
