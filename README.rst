@@ -52,10 +52,9 @@ Settings
 ********
 
 `COMPILER_FORMATS` default: {}
-  A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. 
+  A dictionary specifying the compiler and arguments to associate with each extension. 
 
-
-For example::
+*.css files will be treated like normal css files. For example::
 
     COMPILER_FORMATS = {
         '.sass': {
