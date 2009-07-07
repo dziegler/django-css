@@ -7,15 +7,15 @@ def read(fname):
 README = read('README.rst')
 
 setup(
-    name = "django_compressor",
-    version = "0.5",
-    url = 'http://github.com/mintchaos/django_compressor',
+    name = "django-css",
+    version = "1.1.0",
+    description='django-css provides an easy way to use CSS compilers with Django projects, and an automated system for compressing CSS and JavaScript files',
+    url = 'http://github.com/dziegler/django-css',
     license = 'BSD',
-    description = "Compresses linked and inline javascript or CSS into a single cached file.",
     long_description=README,
 
-    author = 'Christian Metts',
-    author_email = 'xian@mintchaos.com',
+    author = 'David Ziegler',
+    author_email = 'david.ziegler@gmail.com',
     packages = [
         'compressor',
         'compressor.conf',
@@ -31,7 +31,7 @@ setup(
         'BeautifulSoup',
     ],
     classifiers = [
-        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

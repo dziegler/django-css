@@ -1,4 +1,8 @@
-Christian Metts
+django-css was created by David Ziegler <david.ziegler@gmail.com> in 2009
+as a fork of django-compress (r98). It now uses code from Christian Metts' django_compressor.
 
-Django Compressor's filters started life as the filters from Andreas Pelme's
-django-compress.
+django-compress was originally created by Andreas Pelme <andreas@pelme.se> in 2008.
+
+The Python-version of jsmin (http://www.crockford.com/javascript/jsmin.html) 
+is included in django-css. It was translated from to Python by Baruch 
+Evan, from the original jsmin implementation by Douglas Crockford.
