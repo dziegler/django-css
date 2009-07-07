@@ -51,7 +51,7 @@ Which would be rendered like::
 Settings
 ********
 
-`COMPILER_FORMATS` default: `{}`
+`COMPILER_FORMATS` default: {}
   A dictionary specifying the compiler and arguments to associate with each extension. *.css files will be treated like normal css files. 
 
 For example::
