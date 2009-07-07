@@ -73,7 +73,7 @@ django-css will select which CSS compiler to use based off a file's extension. F
     }
 
 
-will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files. *.css files will be treated like normal css files. 
+will use Sass to compile `*.sass` files, HSS to compile `*.hss` files, and clevercss to compile `*.ccss` files. `*.css` files will be treated like normal css files. 
 
 binary_path is the path to the CSS compiler. In the above example, sass and clevercss are installed in my path, and   hss is located at /home/dziegler/hss.
 
