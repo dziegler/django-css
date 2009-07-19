@@ -8,7 +8,7 @@ README = read('README.rst')
 
 setup(
     name = "django-css",
-    version = "1.1.0",
+    version = "2.0.1",
     description='django-css provides an easy way to use CSS compilers with Django projects, and an automated system for compressing CSS and JavaScript files',
     url = 'http://github.com/dziegler/django-css',
     license = 'BSD',
