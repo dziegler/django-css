@@ -92,7 +92,7 @@ class Compressor(object):
                     content = filter(**kwargs)
             except NotImplementedError:
                 pass
-        return content
+        return str(content)
 
     @property
     def combined(self):
