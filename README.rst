@@ -17,7 +17,7 @@ Note: The pypi version of CleverCSS is buggy and will not work with django-css. 
 Installation
 ************
 
-Add `'compressor'` to INSTALLED_APPS.
+Add `compressor` to INSTALLED_APPS.
 
 Usage
 *****
