@@ -176,7 +176,8 @@ class CssCompressor(Compressor):
                 filename = self.get_filename(elem['href'])
                 path, ext = os.path.splitext(filename)
                 if ext in settings.COMPILER_FORMATS.keys():
-                    self.compile(path,settings.COMPILER_FORMATS[ext])
+                    if self.recompile(filename):
+                        self.compile(path,settings.COMPILER_FORMATS[ext])
                     basename = os.path.splitext(os.path.basename(filename))[0]
                     elem = BeautifulSoup(re.sub(basename+ext,basename+'.css',unicode(elem)))
                     filename = path + '.css'
@@ -188,7 +189,18 @@ class CssCompressor(Compressor):
             if elem.name == 'style':
                 self.split_content.append(('hunk', elem.string, elem))
         return self.split_content
-
+    
+    @staticmethod
+    def recompile(filename):
+        path, ext = os.path.splitext(filename)
+        compiled_filename = path + '.css'
+        if not os.path.exists(compiled_filename):
+            return True
+        else:
+            if os.path.getmtime(filename) > os.path.getmtime(compiled_filename):
+                return True
+            else:
+                return False
 
 class JsCompressor(Compressor):
 
