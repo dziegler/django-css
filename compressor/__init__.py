@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 from BeautifulSoup import BeautifulSoup
 
 from django import template
@@ -179,10 +180,15 @@ class CssCompressor(Compressor):
             bin = compiler['binary_path']
         except:
             raise Exception("Path to CSS compiler must be included in COMPILER_FORMATS")
-        if not exe_exists(bin):
-            raise Exception('Path to CSS compiler: %s does not exist.' % bin)
         arguments = compiler.get('arguments','').replace("*",filename)
-        os.system(bin + ' ' + arguments)
+        command = '%s %s' % (bin, arguments)
+        p = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        if p.wait() != 0:
+            err = p.stderr.read()
+            p.stderr.close()
+            if not err:
+                err = 'Invalid command to CSS compiler: %s' % command
+            raise Exception(err)
     
     def split_contents(self):
         if self.split_content:
