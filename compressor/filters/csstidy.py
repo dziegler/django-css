@@ -1,33 +1,33 @@
-import os
-import warnings
-import tempfile
-
+import subprocess
 from django.conf import settings
-
 from compressor.filters import FilterBase
 
 BINARY = getattr(settings, 'CSSTIDY_BINARY', 'csstidy')
-ARGUMENTS = getattr(settings, 'CSSTIDY_ARGUMENTS', '--template=highest')
-
-warnings.simplefilter('ignore', RuntimeWarning)
+ARGUMENTS = getattr(settings, 'CSSTIDY_ARGUMENTS', '--template=highest --silent=true')
 
 class CSSTidyFilter(FilterBase):
     def output(self, **kwargs):
-        tmp_file = tempfile.NamedTemporaryFile(mode='w+b')
-        tmp_file.write(css)
-        tmp_file.flush()
 
-        output_file = tempfile.NamedTemporaryFile(mode='w+b')
+        command = '%s %s %s' % (BINARY, '-', ARGUMENTS)
         
-        command = '%s %s %s %s' % (BINARY, tmp_file.name, ARGUMENTS, output_file.name)
-        
-        command_output = os.popen(command).read()
-        
-        filtered_css = output_file.read()
-        output_file.close()
-        tmp_file.close()
-        
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        p.stdin.write(self.content)
+        p.stdin.close()
+
+        filtered = p.stdout.read()
+        p.stdout.close()
+
+        err = p.stderr.read()
+        p.stderr.close()
+
+        if p.wait() != 0:
+            if not err:
+                err = 'Unable to apply CSSTidy filter'
+
+            raise FilterError(err)
+
         if self.verbose:
-            print command_output
-        
-        return filtered_css
+            print err
+
+        return filtered
+
