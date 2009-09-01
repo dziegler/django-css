@@ -1,0 +1,4 @@
+brown = #5C4032
+
+a:
+    color: $brown

@@ -14,17 +14,24 @@ Thanks to django_compressor, django-css will also version and compress linked an
 
 Note: The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
+Installation
+************
+
+Add ``compressor`` to INSTALLED_APPS.
+
 Usage
 *****
 
 Syntax::
 
+    {% load compress %}
     {% compress <js/css> %}
     <html of inline or linked JS/CSS>
     {% endcompress %}
 
 Examples::
 
+    {% load compress %}
     {% compress css %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
     <link rel="stylesheet" href="/media/css/two.sass" type="text/css" charset="utf-8">
@@ -36,6 +43,7 @@ Which would be rendered like::
 
 or::
 
+    {% load compress %}
     {% compress js %}
     <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
@@ -47,6 +55,7 @@ Which would be rendered like::
 
 If you're using xhtml, you should use::
 
+    {% load compress %}
     {% compress css xhtml %}
     <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />
     <link rel="stylesheet" href="/media/css/two.sass" type="text/css" charset="utf-8" />

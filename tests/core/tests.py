@@ -7,16 +7,24 @@ from compressor.conf import settings
 from django.conf import settings as django_settings
 
 from BeautifulSoup import BeautifulSoup
-
+import os
 
 class CompressorTestCase(TestCase):
 
     def setUp(self):
         settings.COMPRESS = True
+        settings.COMPILER_FORMATS = {
+            '.ccss': {
+                'binary_path': 'python ' + os.path.join(django_settings.TEST_DIR,'clevercss.py'),
+                'arguments': '*.ccss'
+            },
+        }
+        self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/three.ccss" type="text/css" charset="utf-8">
         """
         self.cssNode = CssCompressor(self.css)
 
@@ -25,46 +33,77 @@ class CompressorTestCase(TestCase):
         <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
         """
         self.jsNode = JsCompressor(self.js)
+    
+    def test_css_compiler_exists(self):
+        settings.COMPILER_FORMATS = {
+            '.ccss': {
+                'binary_path': 'python ' + os.path.join(django_settings.TEST_DIR,'clevrcss.py'),
+                'arguments': '*.ccss'
+            },
+        }            
+        self.assertRaises(Exception, self.cssNode.output)
 
     def test_css_split(self):
         out = [
             ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
             ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
             ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
+            ('file', self.ccssFile, '<link rel="stylesheet" href="/media/css/three.css" type="text/css" charset="utf-8" />'),
         ]
         split = self.cssNode.split_contents()
         split = [(x[0], x[1], str(x[2])) for x in split]
         self.assertEqual(out, split)
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
 
     def test_css_hunks(self):
-        out = ['body { background:#990; }', u'p { border:5px solid green;}', 'body { color:#fff; }']
+        out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }', 'a {\n  color: #5c4032;\n}']
         self.assertEqual(out, self.cssNode.hunks)
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
 
     def test_css_output(self):
-        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
+        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }\na {\n  color: #5c4032;\n}'
         self.assertEqual(out, self.cssNode.combined)
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
 
     def test_css_mtimes(self):
         is_date = re.compile(r'^\d{10}\.\d$')
         for date in self.cssNode.mtimes:
             self.assert_(is_date.match(str(date)), "mtimes is returning something that doesn't look like a date")
-
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
+            
     def test_css_return_if_off(self):
         from textwrap import dedent
         settings.COMPRESS = False
-        self.assertEqual(dedent(self.css).strip(), dedent(self.cssNode.output()).strip())
-
+        css = """
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/three.css" type="text/css" charset="utf-8">
+        """
+        self.assertEqual(dedent(css).strip(), dedent(self.cssNode.output()).strip())
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
+            
     def test_cachekey(self):
         is_cachekey = re.compile(r'django_compressor\.\w{12}')
         self.assert_(is_cachekey.match(self.cssNode.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
-
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
+            
     def test_css_hash(self):
-        self.assertEqual('f7c661b7a124', self.cssNode.hash)
-
+        self.assertEqual('105c42e48781', self.cssNode.hash)
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
+            
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/105c42e48781.css" type="text/css" media="all" charset="utf-8">'
         self.assertEqual(output.strip(), self.cssNode.output().strip())
-
+        if os.path.exists(self.ccssFile):
+            os.remove(self.ccssFile)
 
     def test_js_split(self):
         out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
@@ -73,7 +112,7 @@ class CompressorTestCase(TestCase):
         split = self.jsNode.split_contents()
         split = [(x[0], x[1], str(x[2])) for x in split]
         self.assertEqual(out, split)
-
+        
     def test_js_hunks(self):
         out = ['obj = {};', u'obj.value = "value";']
         self.assertEqual(out, self.jsNode.hunks)
