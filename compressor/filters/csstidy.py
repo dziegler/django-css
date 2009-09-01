@@ -23,11 +23,9 @@ class CSSTidyFilter(FilterBase):
         if p.wait() != 0:
             if not err:
                 err = 'Unable to apply CSSTidy filter'
-
             raise FilterError(err)
 
         if self.verbose:
             print err
 
         return filtered
-
