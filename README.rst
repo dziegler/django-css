@@ -139,11 +139,13 @@ Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
 If DEBUG is true off-site files will throw exceptions. If DEBUG is false
 they will be silently stripped.
 
-If COMPRESS is False (defaults to the opposite of DEBUG) CSS files will still be compiled, but files will not be compressed and versioned.
+CSS files are compiled only when needed, because it would be silly to re-compile on every page request. The way this works is that django-css looks at the time your css was last modified, and the time your CleverCSS, HSS, etc file was modified. If the modification time for the CleverCSS, HSS, etc file is after the css file's, then the css file gets re-compiled. 
+
+If COMPRESS is False (defaults to the opposite of DEBUG) CSS files will still be compiled if needed, but files will not be compressed and versioned.
 
 The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
-**Recomendations:**
+**Recommendations:**
 
 * Use only relative or full domain absolute urls in your CSS files.
 * Avoid @import! Simply list all your CSS files in the HTML, they'll be combined anyway.
