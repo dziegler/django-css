@@ -10,14 +10,14 @@ Django-css is a fork of django_compressor_ that makes it easy to use CSS compile
 .. _LESS: http://lesscss.org/
 .. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
 
-Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file.
+Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file. These cached files will get served through whatever frontend server you use for serving static files, because serving static files through Django is just silly.
 
 Note: The pypi version of CleverCSS is buggy and will not work with django-css. Use the updated version on github: http://github.com/dziegler/clevercss/tree/master 
 
 Installation
 ************
 
-Add ``compressor`` to INSTALLED_APPS.
+Add ``compressor`` to INSTALLED_APPS. You should also enable some type of caching backend such as memcached, e.g. ``CACHE_BACKEND = 'memcached://127.0.0.1:11211/'``. Don't worry, your static files are not being served through Django. The only thing stored in cache is the path to the static file.
 
 Usage
 *****
