@@ -21,16 +21,16 @@ class CompressorTestCase(TestCase):
         }
         self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
         self.css = """
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
-        <link rel="stylesheet" href="/media/css/three.ccss" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
         """
         self.cssNode = CssCompressor(self.css)
 
         self.js = """
-        <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        <script src="/media/js/one.js" type="text/javascript"></script>
+        <script type="text/javascript">obj.value = "value";</script>
         """
         self.jsNode = JsCompressor(self.js)
     
@@ -45,10 +45,10 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'),
             ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
-            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" />'),
-            ('file', self.ccssFile, '<link rel="stylesheet" href="/media/css/three.css" type="text/css" charset="utf-8" />'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
+            ('file', self.ccssFile, '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'),
         ]
         split = self.cssNode.split_contents()
         split = [(x[0], x[1], str(x[2])) for x in split]
@@ -79,10 +79,10 @@ class CompressorTestCase(TestCase):
         from textwrap import dedent
         settings.COMPRESS = False
         css = """
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
-        <link rel="stylesheet" href="/media/css/three.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/three.css" type="text/css">
         """
         self.assertEqual(dedent(css).strip(), dedent(self.cssNode.output()).strip())
         if os.path.exists(self.ccssFile):
@@ -100,14 +100,14 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
             
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/105c42e48781.css" type="text/css" media="all" charset="utf-8">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/105c42e48781.css" type="text/css">'
         self.assertEqual(output.strip(), self.cssNode.output().strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
 
     def test_js_split(self):
-        out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>'),
-         ('hunk', u'obj.value = "value";', '<script type="text/javascript" charset="utf-8">obj.value = "value";</script>')
+        out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript"></script>'),
+         ('hunk', u'obj.value = "value";', '<script type="text/javascript">obj.value = "value";</script>')
          ]
         split = self.jsNode.split_contents()
         split = [(x[0], x[1], str(x[2])) for x in split]
@@ -130,7 +130,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(self.js, self.jsNode.output())
 
     def test_js_return_if_on(self):
-        output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js"></script>\n'
         self.assertEqual(output, self.jsNode.output())
 
 
@@ -139,8 +139,8 @@ class CssAbsolutizingTestCase(TestCase):
         settings.COMPRESS = True
         settings.MEDIA_URL = '/media/'
         self.css = """
-        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css" charset="utf-8">
-        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css">
         """
         self.cssNode = CssCompressor(self.css)
 
@@ -166,9 +166,9 @@ class CssAbsolutizingTestCase(TestCase):
 class CssMediaTestCase(TestCase):
     def setUp(self):
         self.css = """
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen">
         <style type="text/css" media="print">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8" media="all">
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css" media="all">
         """
         self.cssNode = CssCompressor(self.css)
 
@@ -189,22 +189,22 @@ class TemplatetagTestCase(TestCase):
 
     def test_css_tag(self):
         template = u"""{% load compress %}{% compress css %}
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}css/two.css" type="text/css">
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
         self.assertEqual(out, self.render(template, context))
 
     def test_js_tag(self):
         template = u"""{% load compress %}{% compress js %}
-        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        <script src="{{ MEDIA_URL }}js/one.js" type="text/javascript"></script>
+        <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>'
+        out = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js"></script>'
         self.assertEqual(out, self.render(template, context))
 

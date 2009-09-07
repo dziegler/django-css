@@ -40,25 +40,25 @@ def compress(parser, token):
     Examples::
 
         {% compress css %}
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
         {% endcompress %}
 
     Which would be rendered something like::
 
-        <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css" media="all" charset="utf-8">
+        <link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">
 
     or::
 
         {% compress js %}
-        <script src="/media/js/one.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">obj.value = "value";</script>
+        <script src="/media/js/one.js" type="text/javascript"></script>
+        <script type="text/javascript">obj.value = "value";</script>
         {% endcompress %}
 
     Which would be rendered something like::
 
-        <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js"></script>
 
     Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
     If DEBUG is true off-site files will throw exceptions. If DEBUG is false
