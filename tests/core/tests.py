@@ -2,7 +2,7 @@ import os, re
 
 from django.template import Template, Context
 from django.test import TestCase
-from compressor import CssCompressor, JsCompressor
+from compressor import CssCompressor, JsCompressor, UncompressableFileError
 from compressor.conf import settings
 from django.conf import settings as django_settings
 
@@ -33,6 +33,16 @@ class CompressorTestCase(TestCase):
         <script type="text/javascript">obj.value = "value";</script>
         """
         self.jsNode = JsCompressor(self.js)
+    
+    def test_get_filename(self):
+        settings.COMPRESS_URL = '/static_test/'
+        settings.COMPRESS_ROOT = os.path.join(os.path.dirname(__file__),'static_test_dir')
+        path = os.path.join(settings.MEDIA_URL,'something.css')
+        filename = self.cssNode.get_filename(path)
+        self.assertEqual(filename,os.path.join(settings.MEDIA_ROOT,'something.css'))
+        path = "http://something.com/static/something.css"
+        self.assertRaises(UncompressableFileError, self.cssNode.get_filename,path)
+        self.assertRaises(UncompressableFileError, self.jsNode.get_filename,path)
     
     def test_css_compiler_exists(self):
         settings.COMPILER_FORMATS = {
