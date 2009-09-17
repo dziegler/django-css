@@ -19,11 +19,11 @@ class CompressorNode(template.Node):
         if self.kind == 'js':
             compressor = JsCompressor(content, xhtml=self.xhtml)
         in_cache = cache.get(compressor.cachekey)
-        if in_cache:
+        if in_cache: 
             return in_cache
         else:
             output = compressor.output()
-            cache.set(compressor.cachekey, output, 86400) # rebuilds the cache once a day if nothign has changed.
+            cache.set(compressor.cachekey, output, 86400) # rebuilds the cache once a day if nothing has changed.
             return output
 
 @register.tag

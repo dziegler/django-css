@@ -67,7 +67,7 @@ class Compressor(object):
 
     @property
     def mtimes(self):
-        return [os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file']
+        return [os.path.getmtime(h['filename']) for h in self.split_contents() if h.has_key('filename')]
 
     @property
     def cachekey(self):
@@ -78,32 +78,21 @@ class Compressor(object):
 
     @property
     def hunks(self):
+        """ Returns a list of processed data
+        """
         if getattr(self, '_hunks', ''):
             return self._hunks
-        self._hunks = []
-        for kind, v, elem in self.split_contents():
-                      
-            if kind == 'convert':
-                # linked file is preprocessed, the result stored in v
-                input = v
-                filename = self.get_filename(elem['href'])
-                if self.filters:
-                    input = self.filter(input, 'input', filename=filename, elem=elem)
-                self._hunks.append(input)            
             
-            if kind == 'hunk':
-                input = v
-                if self.filters:
-                    input = self.filter(input, 'input', elem=elem)
-                self._hunks.append(input)
-                
-            if kind == 'file':
-                fd = open(v, 'rb')
-                input = fd.read()
-                if self.filters:
-                    input = self.filter(input, 'input', filename=v, elem=elem)
-                self._hunks.append(input)
-                fd.close()
+        self._hunks = []
+        for item in self.split_contents():
+            filename = item.get('filename')
+            data     = item.get('data')
+            if not data:
+                data = open(filename, 'rb').read()
+            if self.filters:                    
+                data = self.filter(data, 'input', **item)
+            self._hunks.append(data)
+                    
         return self._hunks
 
     def concat(self):
@@ -160,9 +149,9 @@ class Compressor(object):
             self.split_contents()
         
         if self.xhtml:
-            return os.linesep.join([unicode(i[2]) for i in self.split_content])
+            return os.linesep.join([unicode(i['elem']) for i in self.split_content])
         else:
-            return os.linesep.join([re.sub("\s?/>",">",unicode(i[2])) for i in self.split_content]) 
+            return os.linesep.join([re.sub("\s?/>",">",unicode(i['elem'])) for i in self.split_content]) 
         
     def output(self):
         if not settings.COMPRESS:
@@ -218,7 +207,7 @@ class CssCompressor(Compressor):
                     if pythoncmd:# it's a python!
                         module,func = pythoncmd.split('.')
                         css = getattr(__import__(module),func)(open(filename).read())
-                        self.split_content.append(('convert', css, elem))
+                        self.split_content.append({'data': css, 'elem': elem, 'filename': filename})
                         continue
                         
                     # let's run binary    
@@ -228,12 +217,12 @@ class CssCompressor(Compressor):
                     elem = BeautifulSoup(re.sub(basename+ext,basename+'.css',unicode(elem)))
                     filename = path + '.css'
                 try:
-                    self.split_content.append(('file', filename, elem))
+                    self.split_content.append({'filename': filename, 'elem': elem})
                 except UncompressableFileError:
                     if django_settings.DEBUG:
                         raise
             if elem.name == 'style':
-                self.split_content.append(('hunk', elem.string, elem))
+                self.split_content.append({'data': elem.string, 'elem': elem})
         return self.split_content
     
     @staticmethod
@@ -266,10 +255,11 @@ class JsCompressor(Compressor):
         for elem in split:
             if elem.has_key('src'):
                 try:
-                    self.split_content.append(('file', self.get_filename(elem['src']), elem))
+                    self.split_content.append(
+                        {'filename':self.get_filename(elem['src']), 'elem':elem})
                 except UncompressableFileError:
                     if django_settings.DEBUG:
                         raise
             else:
-                self.split_content.append(('hunk', elem.string, elem))
+                self.split_content.append({'data':elem.string, 'elem': elem})
         return self.split_content
