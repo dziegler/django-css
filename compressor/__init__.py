@@ -17,12 +17,12 @@ register = template.Library()
 class UncompressableFileError(Exception):
     pass
 
-class PythonicParserNotFound(Exception):
+class PythonicCompilerNotFound(Exception):
     pass
 
-def pythonic_parse(fancy_css, ext):
+def pythonic_compile(fancy_css, ext):
     """ Parses the css data with 'ext' handler
-        It is supposed to be stated in form:
+        It is supposed to be stated in a form:
         COMPILER_FORMATS = {
             '.ccss': {
                 'python':'clevercss.convert',
@@ -30,7 +30,7 @@ def pythonic_parse(fancy_css, ext):
         }"""
     pythoncmd = settings.COMPILER_FORMATS[ext].get('python')
     if not pythoncmd:
-        raise PythonicParserNotFound
+        raise PythonicCompilerNotFound
     module,func = pythoncmd.split('.')
     return getattr(__import__(module),func)(fancy_css)     
 
@@ -222,15 +222,16 @@ class CssCompressor(Compressor):
                     # that thing can be compiled
                 
                     try:
-                        css = pythonic_parse(open(filename).read(), ext)
+                        css = pythonic_compile(open(filename).read(), ext)
                         self.split_content.append({'data': css, 'elem': elem, 'filename': filename})
                         continue
-                    except PythonicParserNotFound:
+                    except PythonicCompilerNotFound:
                         pass
                         
                     # let's run binary    
                     if self.recompile(filename):
                         self.compile(path,settings.COMPILER_FORMATS[ext])
+                    # filename and elem are fiddled to have link to plain .css file
                     basename = os.path.splitext(os.path.basename(filename))[0]
                     elem = BeautifulSoup(re.sub(basename+ext,basename+'.css',unicode(elem)))
                     filename = path + '.css'
@@ -243,11 +244,14 @@ class CssCompressor(Compressor):
                 data = elem.string            
                 elem_type = elem.get('type', '').lower()
                 if elem_type and elem_type != "text/css":
-                    # it is to be preprocessed
-                    # TODO: that dot-adding stuff looks strange.
-                    # do we really need dot in COMPILER_FORMATS?
-                    ext = '.'+elem_type.split('/')[1]
-                    data = pythonic_parse(data, ext)
+                    # it has to be preprocessed
+                    if '/' in elem_type:
+                        # we accept 'text/ccss' and plain 'ccss' too
+                        elem_type = elem_type.split('/')[1]
+                    # TODO: that dot-adding compatibility stuff looks strange.
+                    # do we really need a dot in COMPILER_FORMATS keys?
+                    ext = '.'+elem_type
+                    data = pythonic_compile(data, ext)
                     
                 self.split_content.append({'data': data, 'elem': elem})
                 
