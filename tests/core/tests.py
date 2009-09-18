@@ -1,4 +1,5 @@
 import os, re
+from textwrap import dedent
 
 from django.template import Template, Context
 from django.test import TestCase
@@ -7,7 +8,6 @@ from compressor.conf import settings
 from django.conf import settings as django_settings
 
 from BeautifulSoup import BeautifulSoup
-import os
 
 class CompressorTestCase(TestCase):
 
@@ -24,21 +24,20 @@ class CompressorTestCase(TestCase):
         }
         self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
         self.xcssFile = os.path.join(settings.MEDIA_ROOT, u'css/four.xcss')        
-        self.css = """
-<link rel="stylesheet" href="/media/css/one.css" type="text/css">
-<style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/media/css/two.css" type="text/css">
-<link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
-<link rel="stylesheet" href="/media/css/four.xcss" type="text/css">
-<style type="text/xcss">
-small:
-  font-size:10px
-</style>
-<style type="xcss">
-h1:
-  font-weight:bold
-</style>
-"""
+        self.css = dedent("""
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
+        <link rel="stylesheet" href="/media/css/four.xcss" type="text/css">
+        <style type="text/xcss">
+        """)+ \
+        '\n'.join((
+        "small:\n  font-size:10px",
+        '</style>\n<style type="xcss">',
+        "h1:\n  font-weight:bold",
+        "</style>"))
+
         self.cssNode = CssCompressor(self.css)
 
         self.js = """
@@ -126,12 +125,11 @@ h1:
             os.remove(self.ccssFile)
             
     def test_css_return_if_off(self):
-        from textwrap import dedent
         settings.COMPRESS = False
         # TODO: The processor when off replaces all compileable formats with css files
         # Not sure if that is what one would expect from turned off thing
-        css_expected = dedent(self.css).strip().replace('three.ccss', 'three.css')
-        self.assertEqual(css_expected, dedent(self.cssNode.output()).strip())
+        css_expected = self.css.strip().replace('three.ccss', 'three.css')
+        self.assertEqual(css_expected, self.cssNode.output().strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
