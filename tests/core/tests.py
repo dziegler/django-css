@@ -67,21 +67,21 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            {'elem': '<link rel="stylesheet" href="/media/css/one.css" type="text/css" />',
-                'filename': os.path.join(settings.MEDIA_ROOT, u'css/one.css') },
-            {'elem': '<style type="text/css">p { border:5px solid green;}</style>',
-                'data': u'p { border:5px solid green;}' },
-            {'elem': '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />',
-                'filename': os.path.join(settings.MEDIA_ROOT, u'css/two.css') },
-            {'elem': '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />',
-                'filename': self.ccssFile, },
-            {'elem': '<link rel="stylesheet" href="/media/css/four.xcss" type="text/css" />',
-                'filename': self.xcssFile, 
-                'data': u'p {\n  color: black;\n}' },
-            {'elem': '<style type="text/xcss">\nsmall:\n  font-size:10px\n</style>',
-                'data': u'small {\n  font-size: 10px;\n}' },
-            {'elem': '<style type="xcss">\nh1:\n  font-weight:bold\n</style>',
-                'data': u'h1 {\n  font-weight: bold;\n}' }
+            {'filename': os.path.join(settings.MEDIA_ROOT, u'css/one.css'), 
+                'elem': '<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'},
+            {'data': u'p { border:5px solid green;}', 
+                'elem': '<style type="text/css">p { border:5px solid green;}</style>'},
+            {'filename': os.path.join(settings.MEDIA_ROOT, u'css/two.css'), 
+                'elem': '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'},
+            {'filename': self.ccssFile, 
+                'elem': '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'},
+            {'filename': self.xcssFile, 
+                'elem': '<link rel="stylesheet" href="/media/css/four.xcss" type="text/css" />',
+                'data': u'p {\n  color: black;\n}'},
+            {'data': u'small {\n  font-size: 10px;\n}',
+                'elem': '<style type="text/xcss">\nsmall:\n  font-size:10px\n</style>'},
+            {'data': u'h1 {\n  font-weight: bold;\n}',
+                'elem': '<style type="xcss">\nh1:\n  font-weight:bold\n</style>'}
         ]
         split = self.cssNode.split_contents()
         for item in split:
