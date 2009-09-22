@@ -17,23 +17,6 @@ register = template.Library()
 class UncompressableFileError(Exception):
     pass
 
-class PythonicParserNotFound(Exception):
-    pass
-
-def pythonic_parse(fancy_css, ext):
-    """ Parses the css data with 'ext' handler
-        It is supposed to be stated in form:
-        COMPILER_FORMATS = {
-            '.ccss': {
-                'python':'clevercss.convert',
-            },
-        }"""
-    pythoncmd = settings.COMPILER_FORMATS[ext].get('python')
-    if not pythoncmd:
-        raise PythonicParserNotFound
-    module,func = pythoncmd.split('.')
-    return getattr(__import__(module),func)(fancy_css)     
-
 
 def get_hexdigest(plaintext):
     try:
@@ -208,7 +191,6 @@ class CssCompressor(Compressor):
                 err = 'Invalid command to CSS compiler: %s' % command
             raise Exception(err)
     
-    
     def split_contents(self):
         """ Iterates over the elements in the block """
         if self.split_content:
@@ -221,12 +203,12 @@ class CssCompressor(Compressor):
                 if ext in settings.COMPILER_FORMATS.keys():
                     # that thing can be compiled
                 
-                    try:
-                        css = pythonic_parse(open(filename).read(), ext)
+                    pythoncmd = settings.COMPILER_FORMATS[ext].get('python')
+                    if pythoncmd:# it's a python!
+                        module,func = pythoncmd.split('.')
+                        css = getattr(__import__(module),func)(open(filename).read())
                         self.split_content.append({'data': css, 'elem': elem, 'filename': filename})
                         continue
-                    except PythonicParserNotFound:
-                        pass
                         
                     # let's run binary    
                     if self.recompile(filename):
@@ -240,17 +222,7 @@ class CssCompressor(Compressor):
                     if django_settings.DEBUG:
                         raise
             if elem.name == 'style':
-                data = elem.string            
-                elem_type = elem.get('type', '').lower()
-                if elem_type and elem_type != "text/css":
-                    # it is to be preprocessed
-                    # TODO: that dot-adding stuff looks strange.
-                    # do we really need dot in COMPILER_FORMATS?
-                    ext = '.'+elem_type.split('/')[1]
-                    data = pythonic_parse(data, ext)
-                    
-                self.split_content.append({'data': data, 'elem': elem})
-                
+                self.split_content.append({'data': elem.string, 'elem': elem})
         return self.split_content
     
     @staticmethod
