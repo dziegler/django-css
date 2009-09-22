@@ -18,27 +18,14 @@ class CompressorTestCase(TestCase):
                 'binary_path': 'python ' + os.path.join(django_settings.TEST_DIR,'clevercss.py'),
                 'arguments': '*.ccss'
             },
-            '.xcss': {
-                'python':'clevercss.convert',
-            },            
         }
         self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
-        self.xcssFile = os.path.join(settings.MEDIA_ROOT, u'css/four.xcss')        
         self.css = """
-<link rel="stylesheet" href="/media/css/one.css" type="text/css">
-<style type="text/css">p { border:5px solid green;}</style>
-<link rel="stylesheet" href="/media/css/two.css" type="text/css">
-<link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
-<link rel="stylesheet" href="/media/css/four.xcss" type="text/css">
-<style type="text/xcss">
-small:
-  font-size:10px
-</style>
-<style type="xcss">
-h1:
-  font-weight:bold
-</style>
-"""
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
+        """
         self.cssNode = CssCompressor(self.css)
 
         self.js = """
@@ -76,13 +63,6 @@ h1:
                 'elem': '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'},
             {'filename': self.ccssFile, 
                 'elem': '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'},
-            {'filename': self.xcssFile, 
-                'elem': '<link rel="stylesheet" href="/media/css/four.xcss" type="text/css" />',
-                'data': u'p {\n  color: black;\n}'},
-            {'data': u'small {\n  font-size: 10px;\n}',
-                'elem': '<style type="text/xcss">\nsmall:\n  font-size:10px\n</style>'},
-            {'data': u'h1 {\n  font-weight: bold;\n}',
-                'elem': '<style type="xcss">\nh1:\n  font-weight:bold\n</style>'}
         ]
         split = self.cssNode.split_contents()
         for item in split:
@@ -92,28 +72,13 @@ h1:
             os.remove(self.ccssFile)
 
     def test_css_hunks(self):
-        out = ['body { background:#990; }',
-               'p { border:5px solid green;}', 
-               'body { color:#fff; }', 
-               'a {\n  color: #5c4032;\n}',
-               'p {\n  color: black;\n}',
-               'small {\n  font-size: 10px;\n}', 
-               'h1 {\n  font-weight: bold;\n}'               
-               ]
+        out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }', 'a {\n  color: #5c4032;\n}']
         self.assertEqual(out, self.cssNode.hunks)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
 
     def test_css_output(self):
-        out = '\n'.join((
-            'body { background:#990; }',
-            'p { border:5px solid green;}',
-            'body { color:#fff; }',
-            'a {\n  color: #5c4032;\n}',
-            'p {\n  color: black;\n}',
-            'small {\n  font-size: 10px;\n}',
-            'h1 {\n  font-weight: bold;\n}',
-            ))
+        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }\na {\n  color: #5c4032;\n}'
         self.assertEqual(out, self.cssNode.combined)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
@@ -128,10 +93,13 @@ h1:
     def test_css_return_if_off(self):
         from textwrap import dedent
         settings.COMPRESS = False
-        # TODO: The processor when off replaces all compileable formats with css files
-        # Not sure if that is what one would expect from turned off thing
-        css_expected = dedent(self.css).strip().replace('three.ccss', 'three.css')
-        self.assertEqual(css_expected, dedent(self.cssNode.output()).strip())
+        css = """
+        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
+        <style type="text/css">p { border:5px solid green;}</style>
+        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
+        <link rel="stylesheet" href="/media/css/three.css" type="text/css">
+        """
+        self.assertEqual(dedent(css).strip(), dedent(self.cssNode.output()).strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
@@ -142,12 +110,12 @@ h1:
             os.remove(self.ccssFile)
             
     def test_css_hash(self):
-        self.assertEqual('82250ce4120c', self.cssNode.hash)
+        self.assertEqual('105c42e48781', self.cssNode.hash)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/82250ce4120c.css" type="text/css">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/105c42e48781.css" type="text/css">'
         self.assertEqual(output.strip(), self.cssNode.output().strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
