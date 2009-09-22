@@ -8,6 +8,7 @@ from django.conf import settings as django_settings
 
 from BeautifulSoup import BeautifulSoup
 import os
+from textwrap import dedent
 
 class CompressorTestCase(TestCase):
 
@@ -20,12 +21,19 @@ class CompressorTestCase(TestCase):
             },
         }
         self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
-        self.css = """
+        self.css = dedent("""
         <link rel="stylesheet" href="/media/css/one.css" type="text/css">
         <style type="text/css">p { border:5px solid green;}</style>
         <link rel="stylesheet" href="/media/css/two.css" type="text/css">
         <link rel="stylesheet" href="/media/css/three.ccss" type="text/css">
-        """
+        <style type="text/ccss">
+        """)+ \
+        '\n'.join((
+        "small:\n  font-size:10px",
+        '</style>\n<style type="ccss">',
+        "h1:\n  font-weight:bold",
+        "</style>"))
+        
         self.cssNode = CssCompressor(self.css)
 
         self.js = """
@@ -59,6 +67,8 @@ class CompressorTestCase(TestCase):
             ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
             ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
             ('file', self.ccssFile, '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'),
+            ('hunk', 'small {\n  font-size: 10px;\n}', "<style type='text/css'>\nsmall {\n  font-size: 10px;\n}\n</style>"),
+            ('hunk', 'h1 {\n  font-weight: bold;\n}', "<style type='text/css'>\nh1 {\n  font-weight: bold;\n}\n</style>")
         ]
         split = self.cssNode.split_contents()
         split = [(x[0], x[1], str(x[2])) for x in split]
@@ -67,13 +77,13 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
 
     def test_css_hunks(self):
-        out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }', 'a {\n  color: #5c4032;\n}']
+        out = ['body { background:#990; }', 'p { border:5px solid green;}', 'body { color:#fff; }', 'a {\n  color: #5c4032;\n}', 'small {\n  font-size: 10px;\n}', 'h1 {\n  font-weight: bold;\n}']
         self.assertEqual(out, self.cssNode.hunks)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
 
     def test_css_output(self):
-        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }\na {\n  color: #5c4032;\n}'
+        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }\na {\n  color: #5c4032;\n}\nsmall {\n  font-size: 10px;\n}\nh1 {\n  font-weight: bold;\n}'
         self.assertEqual(out, self.cssNode.combined)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
@@ -86,14 +96,15 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
             
     def test_css_return_if_off(self):
-        from textwrap import dedent
         settings.COMPRESS = False
         css = """
-        <link rel="stylesheet" href="/media/css/one.css" type="text/css">
-        <style type="text/css">p { border:5px solid green;}</style>
-        <link rel="stylesheet" href="/media/css/two.css" type="text/css">
-        <link rel="stylesheet" href="/media/css/three.css" type="text/css">
-        """
+<link rel="stylesheet" href="/media/css/one.css" type="text/css">
+<style type="text/css">p { border:5px solid green;}</style>
+<link rel="stylesheet" href="/media/css/two.css" type="text/css">
+<link rel="stylesheet" href="/media/css/three.css" type="text/css">
+<style type='text/css'>\nsmall {\n  font-size: 10px;\n}
+</style>\n<style type='text/css'>\nh1 {\n  font-weight: bold;\n}\n</style>
+"""
         self.assertEqual(dedent(css).strip(), dedent(self.cssNode.output()).strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
@@ -105,12 +116,12 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
             
     def test_css_hash(self):
-        self.assertEqual('105c42e48781', self.cssNode.hash)
+        self.assertEqual('1ff892c21b66', self.cssNode.hash)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/105c42e48781.css" type="text/css">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/1ff892c21b66.css" type="text/css">'
         self.assertEqual(output.strip(), self.cssNode.output().strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
