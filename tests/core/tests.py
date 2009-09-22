@@ -55,18 +55,13 @@ class CompressorTestCase(TestCase):
 
     def test_css_split(self):
         out = [
-            {'filename': os.path.join(settings.MEDIA_ROOT, u'css/one.css'), 
-                'elem': '<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'},
-            {'data': u'p { border:5px solid green;}', 
-                'elem': '<style type="text/css">p { border:5px solid green;}</style>'},
-            {'filename': os.path.join(settings.MEDIA_ROOT, u'css/two.css'), 
-                'elem': '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'},
-            {'filename': self.ccssFile, 
-                'elem': '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'},
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/one.css'), '<link rel="stylesheet" href="/media/css/one.css" type="text/css" />'),
+            ('hunk', u'p { border:5px solid green;}', '<style type="text/css">p { border:5px solid green;}</style>'),
+            ('file', os.path.join(settings.MEDIA_ROOT, u'css/two.css'), '<link rel="stylesheet" href="/media/css/two.css" type="text/css" />'),
+            ('file', self.ccssFile, '<link rel="stylesheet" href="/media/css/three.css" type="text/css" />'),
         ]
         split = self.cssNode.split_contents()
-        for item in split:
-            item['elem'] = str(item['elem'])        
+        split = [(x[0], x[1], str(x[2])) for x in split]
         self.assertEqual(out, split)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
@@ -121,15 +116,11 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
 
     def test_js_split(self):
-        out = [
-            {'filename': os.path.join(settings.MEDIA_ROOT, u'js/one.js'), 
-             'elem':'<script src="/media/js/one.js" type="text/javascript"></script>'},
-            {'data': u'obj.value = "value";', 
-             'elem': '<script type="text/javascript">obj.value = "value";</script>'},
+        out = [('file', os.path.join(settings.MEDIA_ROOT, u'js/one.js'), '<script src="/media/js/one.js" type="text/javascript"></script>'),
+         ('hunk', u'obj.value = "value";', '<script type="text/javascript">obj.value = "value";</script>')
          ]
         split = self.jsNode.split_contents()
-        for item in split:
-            item['elem'] = str(item['elem'])
+        split = [(x[0], x[1], str(x[2])) for x in split]
         self.assertEqual(out, split)
         
     def test_js_hunks(self):
