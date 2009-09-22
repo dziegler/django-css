@@ -82,21 +82,11 @@ class Compressor(object):
             return self._hunks
         self._hunks = []
         for kind, v, elem in self.split_contents():
-                      
-            if kind == 'convert':
-                # linked file is preprocessed, the result stored in v
-                input = v
-                filename = self.get_filename(elem['href'])
-                if self.filters:
-                    input = self.filter(input, 'input', filename=filename, elem=elem)
-                self._hunks.append(input)            
-            
             if kind == 'hunk':
                 input = v
                 if self.filters:
                     input = self.filter(input, 'input', elem=elem)
                 self._hunks.append(input)
-                
             if kind == 'file':
                 fd = open(v, 'rb')
                 input = fd.read()
@@ -186,8 +176,6 @@ class CssCompressor(Compressor):
         super(CssCompressor, self).__init__(content, ouput_prefix, xhtml)
         
     def compile(self,filename,compiler):
-        """ Runs compiler on given file. 
-            Results are expected to appear nearby, same name, .css extension """
         try:
             bin = compiler['binary_path']
         except:
@@ -203,7 +191,6 @@ class CssCompressor(Compressor):
             raise Exception(err)
     
     def split_contents(self):
-        """ Iterates over the elements in the block """
         if self.split_content:
             return self.split_content
         split = self.soup.findAll({'link' : True, 'style' : True})
@@ -212,16 +199,6 @@ class CssCompressor(Compressor):
                 filename = self.get_filename(elem['href'])
                 path, ext = os.path.splitext(filename)
                 if ext in settings.COMPILER_FORMATS.keys():
-                    # that thing can be compiled
-                
-                    pythoncmd = settings.COMPILER_FORMATS[ext].get('python')
-                    if pythoncmd:# it's a python!
-                        module,func = pythoncmd.split('.')
-                        css = getattr(__import__(module),func)(open(filename).read())
-                        self.split_content.append(('convert', css, elem))
-                        continue
-                        
-                    # let's run binary    
                     if self.recompile(filename):
                         self.compile(path,settings.COMPILER_FORMATS[ext])
                     basename = os.path.splitext(os.path.basename(filename))[0]
@@ -238,8 +215,6 @@ class CssCompressor(Compressor):
     
     @staticmethod
     def recompile(filename):
-        """ Needed for CCS Compilers, 
-            returns True when file needs recompiling """
         path, ext = os.path.splitext(filename)
         compiled_filename = path + '.css'
         if not os.path.exists(compiled_filename):
