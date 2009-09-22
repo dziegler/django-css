@@ -73,6 +73,9 @@ class Compressor(object):
 
     @property
     def cachekey(self):
+        """
+        cachekey for this block of css or js.
+        """
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
@@ -80,6 +83,9 @@ class Compressor(object):
 
     @property
     def hunks(self):
+        """
+        Returns a list of processed data
+        """
         if getattr(self, '_hunks', ''):
             return self._hunks
         self._hunks = []
@@ -146,6 +152,9 @@ class Compressor(object):
         return True
 
     def return_compiled_content(self, content):
+        """
+        Return compiled css
+        """
         if self.type != 'css':
             return content
         if not self.split_content:
@@ -157,6 +166,9 @@ class Compressor(object):
             return os.linesep.join([re.sub("\s?/>",">",unicode(i[2])) for i in self.split_content]) 
         
     def output(self):
+        """
+        Return the versioned file path if COMPRESS = True
+        """
         if not settings.COMPRESS:
             return self.return_compiled_content(self.content)
         url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
@@ -176,8 +188,13 @@ class CssCompressor(Compressor):
         self.filters.extend(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
         super(CssCompressor, self).__init__(content, ouput_prefix, xhtml)
-        
-    def compile(self,filename,compiler):
+    
+    @staticmethod
+    def compile(filename,compiler):
+        """
+        Runs compiler on given file. 
+        Results are expected to appear nearby, same name, .css extension
+        """
         try:
             bin = compiler['binary_path']
         except:
@@ -220,7 +237,23 @@ class CssCompressor(Compressor):
 
         return data  
     
+    @staticmethod
+    def recompile(filename):
+        """
+        Needed for CCS Compilers, returns True when file needs recompiling
+        """
+        path, ext = os.path.splitext(filename)
+        compiled_filename = path + '.css'
+        if not os.path.exists(compiled_filename):
+            return True
+        else:
+            if os.path.getmtime(filename) > os.path.getmtime(compiled_filename):
+                return True
+            else:
+                return False
+            
     def split_contents(self):
+        """ Iterates over the elements in the block """
         if self.split_content:
             return self.split_content
         split = self.soup.findAll({'link' : True, 'style' : True})
@@ -255,18 +288,7 @@ class CssCompressor(Compressor):
                 self.split_content.append(('hunk', data, elem))
         return self.split_content
     
-    @staticmethod
-    def recompile(filename):
-        path, ext = os.path.splitext(filename)
-        compiled_filename = path + '.css'
-        if not os.path.exists(compiled_filename):
-            return True
-        else:
-            if os.path.getmtime(filename) > os.path.getmtime(compiled_filename):
-                return True
-            else:
-                return False
-
+    
 class JsCompressor(Compressor):
 
     def __init__(self, content, ouput_prefix="js", xhtml=False):
@@ -277,6 +299,7 @@ class JsCompressor(Compressor):
         super(JsCompressor, self).__init__(content, ouput_prefix, xhtml)
 
     def split_contents(self):
+        """ Iterates over the elements in the block """
         if self.split_content:
             return self.split_content
         split = self.soup.findAll('script')
