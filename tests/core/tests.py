@@ -126,7 +126,7 @@ class CompressorTestCase(TestCase):
             
     def test_css_return_if_off(self):
         settings.COMPRESS = False
-        # TODO: The processor replaces all compileable formats with .css even when off
+        # TODO: The processor when off replaces all compileable formats with css files
         # Not sure if that is what one would expect from turned off thing
         css_expected = self.css.strip().replace('three.ccss', 'three.css')
         self.assertEqual(css_expected, self.cssNode.output().strip())
