@@ -2,6 +2,8 @@ import os
 import re
 import subprocess
 from BeautifulSoup import BeautifulSoup
+from tempfile import NamedTemporaryFile
+from textwrap import dedent
 
 from django import template
 from django.conf import settings as django_settings
@@ -71,6 +73,9 @@ class Compressor(object):
 
     @property
     def cachekey(self):
+        """
+        cachekey for this block of css or js.
+        """
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
@@ -78,6 +83,9 @@ class Compressor(object):
 
     @property
     def hunks(self):
+        """
+        Returns a list of processed data
+        """
         if getattr(self, '_hunks', ''):
             return self._hunks
         self._hunks = []
@@ -144,17 +152,23 @@ class Compressor(object):
         return True
 
     def return_compiled_content(self, content):
+        """
+        Return compiled css
+        """
         if self.type != 'css':
             return content
         if not self.split_content:
             self.split_contents()
-        
+
         if self.xhtml:
             return os.linesep.join([unicode(i[2]) for i in self.split_content])
         else:
             return os.linesep.join([re.sub("\s?/>",">",unicode(i[2])) for i in self.split_content]) 
         
     def output(self):
+        """
+        Return the versioned file path if COMPRESS = True
+        """
         if not settings.COMPRESS:
             return self.return_compiled_content(self.content)
         url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
@@ -174,8 +188,13 @@ class CssCompressor(Compressor):
         self.filters.extend(settings.COMPRESS_CSS_FILTERS)
         self.type = 'css'
         super(CssCompressor, self).__init__(content, ouput_prefix, xhtml)
-        
-    def compile(self,filename,compiler):
+    
+    @staticmethod
+    def compile(filename,compiler):
+        """
+        Runs compiler on given file. 
+        Results are expected to appear nearby, same name, .css extension
+        """
         try:
             bin = compiler['binary_path']
         except:
@@ -190,7 +209,51 @@ class CssCompressor(Compressor):
                 err = 'Invalid command to CSS compiler: %s' % command
             raise Exception(err)
     
+    def compile_inline(self,data,ext):
+        """
+        Compile inline css. Have to compile to a file, because some css compilers
+        may not output to stdout, but we know they all output to a file. It's a
+        little hackish, but you shouldn't be compiling in production anyway,
+        right?
+        """
+        compiler = settings.COMPILER_FORMATS[ext]
+        try:
+            bin = compiler['binary_path']
+        except:
+            raise Exception("Path to CSS compiler must be included in COMPILER_FORMATS")
+        
+        tmp_file = NamedTemporaryFile(mode='w',suffix=ext)
+        tmp_file.write(dedent(data))
+        tmp_file.flush()
+        path, ext = os.path.splitext(tmp_file.name)
+        tmp_css = ''.join((path,'.css'))
+        
+        self.compile(path,compiler)
+        data = open(tmp_css,'r').read()
+        
+        # cleanup
+        tmp_file.close()
+        os.remove(tmp_css)
+
+        return data  
+    
+    @staticmethod
+    def recompile(filename):
+        """
+        Needed for CCS Compilers, returns True when file needs recompiling
+        """
+        path, ext = os.path.splitext(filename)
+        compiled_filename = path + '.css'
+        if not os.path.exists(compiled_filename):
+            return True
+        else:
+            if os.path.getmtime(filename) > os.path.getmtime(compiled_filename):
+                return True
+            else:
+                return False
+            
     def split_contents(self):
+        """ Iterates over the elements in the block """
         if self.split_content:
             return self.split_content
         split = self.soup.findAll({'link' : True, 'style' : True})
@@ -210,21 +273,22 @@ class CssCompressor(Compressor):
                     if django_settings.DEBUG:
                         raise
             if elem.name == 'style':
-                self.split_content.append(('hunk', elem.string, elem))
+                data = elem.string            
+                elem_type = elem.get('type', '').lower()
+                if elem_type and elem_type != "text/css":
+                    # it has to be preprocessed
+                    if '/' in elem_type:
+                        # we accept 'text/ccss' and plain 'ccss' too
+                        elem_type = elem_type.split('/')[1]
+                    # TODO: that dot-adding compatibility stuff looks strange.
+                    # do we really need a dot in COMPILER_FORMATS keys?
+                    ext = '.'+elem_type
+                    data = self.compile_inline(data,ext)
+                    elem = ''.join(("<style type='text/css'>\n",data,"\n</style>"))
+                self.split_content.append(('hunk', data, elem))
         return self.split_content
     
-    @staticmethod
-    def recompile(filename):
-        path, ext = os.path.splitext(filename)
-        compiled_filename = path + '.css'
-        if not os.path.exists(compiled_filename):
-            return True
-        else:
-            if os.path.getmtime(filename) > os.path.getmtime(compiled_filename):
-                return True
-            else:
-                return False
-
+    
 class JsCompressor(Compressor):
 
     def __init__(self, content, ouput_prefix="js", xhtml=False):
@@ -235,6 +299,7 @@ class JsCompressor(Compressor):
         super(JsCompressor, self).__init__(content, ouput_prefix, xhtml)
 
     def split_contents(self):
+        """ Iterates over the elements in the block """
         if self.split_content:
             return self.split_content
         split = self.soup.findAll('script')
