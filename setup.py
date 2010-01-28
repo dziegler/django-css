@@ -8,7 +8,7 @@ README = read('README.rst')
 
 setup(
     name = "django-css",
-    version = "2.2",
+    version = "2.2.1",
     description='django-css provides an easy way to use CSS compilers with Django projects, and an automated system for compressing CSS and JavaScript files',
     url = 'http://github.com/dziegler/django-css',
     license = 'BSD',
@@ -23,13 +23,11 @@ setup(
         'compressor.filters.jsmin',
         'compressor.templatetags',
     ],
-    package_data = {'compressor': [
-        'templates/compressor/js.html',
-        'templates/compressor/css.html'
-    ],},
+    package_data = {'compressor': ['templates/compressor/*.html']},
     requires = [
         'BeautifulSoup',
     ],
+    zip_safe = False,
     classifiers = [
         'Environment :: Web Environment',
         'Framework :: Django',
