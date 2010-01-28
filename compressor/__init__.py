@@ -10,10 +10,12 @@ from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.utils.encoding import smart_str
+
 try:
     from django.contrib.sites.models import Site
     DOMAIN = Site.objects.get_current().domain
-except ImportError:
+except:
     DOMAIN = ''
 
 from compressor.conf import settings
@@ -28,12 +30,13 @@ class UncompressableFileError(Exception):
 
 
 def get_hexdigest(plaintext):
+    p = smart_str(plaintext)
     try:
         import hashlib
-        return hashlib.sha1(plaintext).hexdigest()
+        return hashlib.sha1(p).hexdigest()
     except ImportError:
         import sha
-        return sha.new(plaintext).hexdigest()
+        return sha.new(p).hexdigest()
 
 def exe_exists(program):
 

@@ -4,7 +4,7 @@ from django.core.cache import cache
 try:
     from django.contrib.sites.models import Site
     DOMAIN = Site.objects.get_current().domain
-except ImportError:
+except:
     DOMAIN = ''
     
 from compressor import CssCompressor, JsCompressor

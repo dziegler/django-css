@@ -110,7 +110,7 @@ class CompressorTestCase(TestCase):
             os.remove(self.ccssFile)
             
     def test_cachekey(self):
-        is_cachekey = re.compile(r'django_compressor\.\w{12}')
+        is_cachekey = re.compile(r'\.?django_compressor\.\w{12}')
         self.assert_(is_cachekey.match(self.cssNode.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)

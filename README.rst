@@ -19,6 +19,14 @@ Installation
 
 Add ``compressor`` to INSTALLED_APPS. You should also enable some type of caching backend such as memcached, e.g. ``CACHE_BACKEND = 'memcached://127.0.0.1:11211/'``. Don't worry, your static files are not being served through Django. The only thing stored in cache is the path to the static file.
 
+
+NEW in v2.2!
+*************
+Django-css now uses Django's storage backend when saving compressed files. This means that if you're using something like the S3 backend in django-storages_, your compressed files will automatically be saved to S3. If not, everything should function as normal. Check out django-storages_ for more info on custom storage backends.
+
+.. _django-storages: http://code.welldev.org/django-storages/wiki/Home
+
+
 Usage
 *****
 
