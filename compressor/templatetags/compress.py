@@ -1,5 +1,12 @@
 from django import template
 from django.core.cache import cache
+
+try:
+    from django.contrib.sites.models import Site
+    DOMAIN = Site.objects.get_current().domain
+except ImportError:
+    DOMAIN = ''
+    
 from compressor import CssCompressor, JsCompressor
 from compressor.conf import settings
 from time import sleep
@@ -23,7 +30,7 @@ class CompressorNode(template.Node):
             return in_cache
         else:
             # do this to prevent dog piling
-            in_progress_key = 'django_css.in_progress.%s' % compressor.cachekey
+            in_progress_key = '%s.django_css.in_progress.%s' % (DOMAIN, compressor.cachekey)
             in_progress = cache.get(in_progress_key)
             if in_progress:
                 while cache.get(in_progress_key):
@@ -33,7 +40,7 @@ class CompressorNode(template.Node):
                 cache.set(in_progress_key, True, 300)
                 try:
                     output = compressor.output()
-                    cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothign has changed.
+                    cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothing has changed.
                 except:
                     from traceback import format_exc
                     raise Exception(format_exc())

@@ -8,6 +8,13 @@ from textwrap import dedent
 from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+try:
+    from django.contrib.sites.models import Site
+    DOMAIN = Site.objects.get_current().domain
+except ImportError:
+    DOMAIN = ''
 
 from compressor.conf import settings
 from compressor import filters
@@ -79,7 +86,7 @@ class Compressor(object):
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
-        return "django_compressor.%s" % get_hexdigest(cachestr)[:12]
+        return "%s.django_compressor.%s" % (DOMAIN, get_hexdigest(cachestr)[:12])
 
     @property
     def hunks(self):
@@ -141,14 +148,9 @@ class Compressor(object):
 
     def save_file(self):
         filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
-        if os.path.exists(filename):
+        if default_storage.exists(filename):
             return False
-        dirname = os.path.dirname(filename)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        fd = open(filename, 'wb+')
-        fd.write(self.combined)
-        fd.close()
+        default_storage.save(filename, ContentFile(self.combined))
         return True
 
     def return_compiled_content(self, content):
@@ -161,9 +163,9 @@ class Compressor(object):
             self.split_contents()
 
         if self.xhtml:
-            return os.linesep.join([unicode(i[2]) for i in self.split_content])
+            return os.linesep.join((unicode(i[2]) for i in self.split_content))
         else:
-            return os.linesep.join([re.sub("\s?/>",">",unicode(i[2])) for i in self.split_content]) 
+            return os.linesep.join((re.sub("\s?/>",">",unicode(i[2])) for i in self.split_content)) 
         
     def output(self):
         """
