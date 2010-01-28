@@ -150,10 +150,9 @@ class Compressor(object):
         return filepath
 
     def save_file(self):
-        filename = "%s/%s" % (settings.MEDIA_ROOT.rstrip('/'), self.new_filepath)
-        if default_storage.exists(filename):
+        if default_storage.exists(self.new_filepath):
             return False
-        default_storage.save(filename, ContentFile(self.combined))
+        default_storage.save(self.new_filepath, ContentFile(self.combined))
         return True
 
     def return_compiled_content(self, content):
