@@ -4,7 +4,10 @@ import subprocess
 from BeautifulSoup import BeautifulSoup
 from tempfile import NamedTemporaryFile
 from textwrap import dedent
-
+try:
+    from hashlib import sha1
+except ImportError:
+    from sha import new as sha1
 from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
@@ -31,12 +34,7 @@ class UncompressableFileError(Exception):
 
 def get_hexdigest(plaintext):
     p = smart_str(plaintext)
-    try:
-        import hashlib
-        return hashlib.sha1(p).hexdigest()
-    except ImportError:
-        import sha
-        return sha.new(p).hexdigest()
+    return sha1(p).hexdigest()
 
 def exe_exists(program):
 
@@ -79,7 +77,7 @@ class Compressor(object):
 
     @property
     def mtimes(self):
-        return [os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file']
+        return (os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file')
 
     @property
     def cachekey(self):
@@ -145,8 +143,8 @@ class Compressor(object):
 
     @property
     def new_filepath(self):
-        filename = "".join([self.hash, self.extension])
-        filepath = "%s/%s/%s" % (settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename)
+        filename = "".join((self.hash, self.extension))
+        filepath = "/".join((settings.OUTPUT_DIR.strip('/'), self.ouput_prefix, filename))
         return filepath
 
     def save_file(self):
@@ -175,7 +173,7 @@ class Compressor(object):
         """
         if not settings.COMPRESS:
             return self.return_compiled_content(self.content)
-        url = "%s/%s" % (settings.MEDIA_URL.rstrip('/'), self.new_filepath)
+        url = "/".join((settings.MEDIA_URL.rstrip('/'), self.new_filepath))
         self.save_file()
         context = getattr(self, 'extra_context', {})
         context['url'] = url
