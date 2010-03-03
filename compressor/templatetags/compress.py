@@ -95,8 +95,8 @@ def compress(parser, token):
         raise template.TemplateSyntaxError("%r tag requires either 1, 3 or 5 arguments." % args[0])
 
     kind = args[1]
-    if not kind in ['css', 'js']:
-        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % (args[0], ', '.join(ALLOWED_ARGS)))
+    if kind not in ('css', 'js'):
+        raise template.TemplateSyntaxError("%r's argument must be 'js' or 'css'." % args[0])
     
     try:
         xhtml = args[2] == "xhtml"
