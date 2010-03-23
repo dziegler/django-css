@@ -31,20 +31,15 @@ class CompressorNode(template.Node):
         else:
             # do this to prevent dog piling
             in_progress_key = '%s.django_css.in_progress.%s' % (DOMAIN, compressor.cachekey)
-            in_progress = cache.get(in_progress_key)
-            if in_progress:
+            added_to_cache = cache.add(in_progress_key, True, 300)
+            if added_to_cache:
+                output = compressor.output()
+                cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothing has changed.
+                cache.set(in_progress_key, False, 300)
+            else:
                 while cache.get(in_progress_key):
                     sleep(0.1)
                 output = cache.get(compressor.cachekey)
-            else:
-                cache.set(in_progress_key, True, 300)
-                try:
-                    output = compressor.output()
-                    cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothing has changed.
-                except:
-                    from traceback import format_exc
-                    raise Exception(format_exc())
-                cache.set(in_progress_key, False, 300)
             return output
 
 @register.tag

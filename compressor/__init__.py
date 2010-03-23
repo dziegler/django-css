@@ -87,7 +87,7 @@ class Compressor(object):
         cachebits = [self.content]
         cachebits.extend([str(m) for m in self.mtimes])
         cachestr = "".join(cachebits)
-        return "%s.django_compressor.%s" % (DOMAIN, get_hexdigest(cachestr)[:12])
+        return "%s.django_compressor.%s.%s" % (DOMAIN, get_hexdigest(cachestr)[:12], settings.COMPRESS)
 
     @property
     def hunks(self):
