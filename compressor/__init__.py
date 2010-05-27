@@ -10,7 +10,6 @@ except ImportError:
     from sha import new as sha1
 from django import template
 from django.conf import settings as django_settings
-from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.utils.encoding import smart_str
@@ -69,24 +68,26 @@ class Compressor(object):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
     def get_filename(self, url):
+        url = url.replace("https://","http://")
         if not url.startswith(settings.MEDIA_URL):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.MEDIA_URL))
         basename = url[len(settings.MEDIA_URL):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
-
+    
     @property
-    def mtimes(self):
-        return (os.path.getmtime(h[1]) for h in self.split_contents() if h[0] == 'file')
+    def cachebits(self):
+        for hunk in self.split_contents():
+            if hunk[0] == 'file':
+                yield hunk[0]
+                yield os.path.getmtime(hunk[1])
 
     @property
     def cachekey(self):
         """
         cachekey for this block of css or js.
         """
-        cachebits = [self.content]
-        cachebits.extend([str(m) for m in self.mtimes])
-        cachestr = "".join(cachebits)
+        cachestr = "".join((str(c) for c in self.cachebits))
         return "%s.django_compressor.%s.%s" % (DOMAIN, get_hexdigest(cachestr)[:12], settings.COMPRESS)
 
     @property
@@ -148,8 +149,6 @@ class Compressor(object):
         return filepath
 
     def save_file(self):
-        if default_storage.exists(self.new_filepath):
-            return False
         default_storage.save(self.new_filepath, ContentFile(self.combined))
         return True
 
@@ -173,13 +172,9 @@ class Compressor(object):
         """
         if not settings.COMPRESS:
             return self.return_compiled_content(self.content)
-        url = "/".join((settings.MEDIA_URL.rstrip('/'), self.new_filepath))
         self.save_file()
-        context = getattr(self, 'extra_context', {})
-        context['url'] = url
-        context['xhtml'] = self.xhtml
-        return render_to_string(self.template_name, context)
-
+        return self.new_filepath
+        
 
 class CssCompressor(Compressor):
 
