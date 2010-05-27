@@ -26,21 +26,23 @@ class CompressorNode(template.Node):
             compressor = CssCompressor(content, xhtml=self.xhtml)
         if self.kind == 'js':
             compressor = JsCompressor(content, xhtml=self.xhtml)
-        filepath = cache.get(compressor.cachekey)
-        if filepath is None:
+        output = cache.get(compressor.cachekey)
+        if output is None:
             # do this to prevent dog piling
             in_progress_key = '%s.django_css.in_progress.%s' % (DOMAIN, compressor.cachekey)
             added_to_cache = cache.add(in_progress_key, True, 300)
             if added_to_cache:
-                filepath = compressor.output()
-                cache.set(compressor.cachekey, filepath, 2591000) # rebuilds the cache every 30 days if nothing has changed.
+                output = compressor.output()
+                cache.set(compressor.cachekey, output, 2591000) # rebuilds the cache every 30 days if nothing has changed.
                 cache.set(in_progress_key, False, 300)
             else:
                 while cache.get(in_progress_key):
                     sleep(0.1)
-                filepath = cache.get(compressor.cachekey)
-        
-        return render_to_string(compressor.template_name, {'filepath':filepath, 'xhtml':self.xhtml}, context)
+                output = cache.get(compressor.cachekey)
+        if settings.COMPRESS:
+            return render_to_string(compressor.template_name, {'filepath':output, 'xhtml':self.xhtml}, context)
+        else:
+            return output
 
 @register.tag
 def compress(parser, token):
