@@ -1,6 +1,6 @@
 import subprocess
 from django.conf import settings
-from compressor.filters import FilterBase
+from compressor.filters import FilterBase, FilterError
 
 BINARY = getattr(settings, 'CSSTIDY_BINARY', 'csstidy')
 ARGUMENTS = getattr(settings, 'CSSTIDY_ARGUMENTS', '--template=highest --silent=true')
