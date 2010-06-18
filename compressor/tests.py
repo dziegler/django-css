@@ -1,22 +1,28 @@
-import os, re
+import os
+import re
+from textwrap import dedent
+from BeautifulSoup import BeautifulSoup
 
+from django.conf import settings as django_settings
 from django.template import Template, Context
 from django.test import TestCase
+
 from compressor import CssCompressor, JsCompressor, UncompressableFileError
 from compressor.conf import settings
-from django.conf import settings as django_settings
-
-from BeautifulSoup import BeautifulSoup
-import os
-from textwrap import dedent
 
 class CompressorTestCase(TestCase):
 
     def setUp(self):
+        self.TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "testing")
+        settings.MEDIA_ROOT = os.path.join(self.TEST_DIR, 'media')
+        settings.COMPRESS_CSS_FILTERS = []
+        settings.COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
+
+        
         settings.COMPRESS = True
         settings.COMPILER_FORMATS = {
             '.ccss': {
-                'binary_path': 'python ' + os.path.join(django_settings.TEST_DIR,'clevercss.py'),
+                'binary_path': 'python ' + os.path.join(self.TEST_DIR,'clevercss.py'),
                 'arguments': '*.ccss'
             },
         }
@@ -33,6 +39,8 @@ class CompressorTestCase(TestCase):
         '</style>\n<style type="ccss">',
         "h1:\n  font-weight:bold",
         "</style>"))
+        self.css_hash = "1ff892c21b66"
+        self.js_hash = "3f33b9146e12"
         
         self.cssNode = CssCompressor(self.css)
 
@@ -55,7 +63,7 @@ class CompressorTestCase(TestCase):
     def test_css_compiler_exists(self):
         settings.COMPILER_FORMATS = {
             '.ccss': {
-                'binary_path': 'python ' + os.path.join(django_settings.TEST_DIR,'clevrcss.py'),
+                'binary_path': 'python ' + os.path.join(self.TEST_DIR,'clevrcss.py'),
                 'arguments': '*.ccss'
             },
         }            
@@ -109,19 +117,13 @@ class CompressorTestCase(TestCase):
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
-    def test_cachekey(self):
-        is_cachekey = re.compile(r'\.?django_compressor\.\w{12}')
-        self.assert_(is_cachekey.match(self.cssNode.cachekey), "cachekey is returning something that doesn't look like r'django_compressor\.\w{12}'")
-        if os.path.exists(self.ccssFile):
-            os.remove(self.ccssFile)
-            
     def test_css_hash(self):
-        self.assertEqual('1ff892c21b66', self.cssNode.hash)
+        self.assertEqual(self.css_hash, self.cssNode.hash)
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
             
     def test_css_return_if_on(self):
-        output = u'<link rel="stylesheet" href="/media/CACHE/css/1ff892c21b66.css" type="text/css">'
+        output = u'<link rel="stylesheet" href="/media/CACHE/css/%s.css" type="text/css">' % self.css_hash
         self.assertEqual(output.strip(), self.cssNode.output().strip())
         if os.path.exists(self.ccssFile):
             os.remove(self.ccssFile)
@@ -151,7 +153,7 @@ class CompressorTestCase(TestCase):
         self.assertEqual(self.js, self.jsNode.output())
 
     def test_js_return_if_on(self):
-        output = u'<script type="text/javascript" src="/media/CACHE/js/3f33b9146e12.js"></script>\n'
+        output = u'<script type="text/javascript" src="/media/CACHE/js/%s.js"></script>\n' % self.js_hash
         self.assertEqual(output, self.jsNode.output())
 
 
@@ -216,7 +218,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/32896eb8bce1.css" type="text/css">'
         self.assertEqual(out, self.render(template, context))
 
     def test_js_tag(self):
