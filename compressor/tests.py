@@ -174,11 +174,17 @@ class CssAbsolutizingTestCase(TestCase):
         output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
         filter = CssAbsoluteFilter(content)
         self.assertEqual(output, filter.input(filename=filename))
+        self.assertEqual(output, filter.input(filename=filename, media_url=settings.MEDIA_URL))
+        
         settings.MEDIA_URL = 'http://media.example.com/'
         filename = os.path.join(settings.MEDIA_ROOT, 'css/url/test.css')
         output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
-        self.assertEqual(output, filter.input(filename=filename))
-
+        self.assertEqual(output, filter.input(filename=filename, media_url=settings.MEDIA_URL))
+        
+        settings.MEDIA_URL = 'https://media.example.com/'
+        output = "p { background: url('%simages/image.gif') }" % settings.MEDIA_URL
+        self.assertEqual(output, filter.input(filename=filename, media_url=settings.MEDIA_URL))
+        
     def test_css_hunks(self):
         out = [u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n", 
                u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n"

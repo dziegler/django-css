@@ -10,7 +10,7 @@ URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
 
 class CssAbsoluteFilter(FilterBase):
-    def input(self, filename=None, **kwargs):
+    def input(self, filename=None, media_url=settings.MEDIA_URL, **kwargs):
         media_root = os.path.abspath(settings.MEDIA_ROOT)
         if filename is not None:
             filename = os.path.abspath(filename)
@@ -18,7 +18,7 @@ class CssAbsoluteFilter(FilterBase):
             return self.content
         self.media_path = filename[len(media_root):]
         self.media_path = self.media_path.lstrip('/')
-        self.media_url = settings.MEDIA_URL.rstrip('/')
+        self.media_url = media_url.rstrip('/')
         try:
             mtime = os.path.getmtime(filename)
             self.mtime = get_hexdigest(str(int(mtime)))[:12]

@@ -41,12 +41,13 @@ def exe_exists(program):
 
 class Compressor(object):
 
-    def __init__(self, content, ouput_prefix="compressed", xhtml=False):
+    def __init__(self, content, ouput_prefix="compressed", xhtml=False, media_url=settings.MEDIA_URL):
         self.content = content
         self.ouput_prefix = ouput_prefix
         self.split_content = []
         self.soup = BeautifulSoup(self.content)
         self.xhtml = xhtml
+        self.media_url = media_url
         try:
           from django.contrib.sites.models import Site
           self.domain = Site.objects.get_current().domain
@@ -61,9 +62,9 @@ class Compressor(object):
         raise NotImplementedError('split_contents must be defined in a subclass')
 
     def get_filename(self, url):
-        if not url.startswith(settings.MEDIA_URL):
-            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, settings.MEDIA_URL))
-        basename = url[len(settings.MEDIA_URL):]
+        if not url.startswith(self.media_url):
+            raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, self.media_url))
+        basename = url[len(self.media_url):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
         return filename
 
@@ -112,7 +113,7 @@ class Compressor(object):
             filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
             try:
                 if callable(filter):
-                    content = filter(**kwargs)
+                    content = filter(media_url=self.media_url, **kwargs)
             except NotImplementedError:
                 pass
         return str(content)
@@ -164,7 +165,7 @@ class Compressor(object):
         """
         if not settings.COMPRESS:
             return self.return_compiled_content(self.content)
-        url = "/".join((settings.MEDIA_URL.rstrip('/'), self.new_filepath))
+        url = "/".join((self.media_url.rstrip('/'), self.new_filepath))
         self.save_file()
         context = getattr(self, 'extra_context', {})
         context['url'] = url
@@ -174,12 +175,12 @@ class Compressor(object):
 
 class CssCompressor(Compressor):
 
-    def __init__(self, content, ouput_prefix="css", xhtml=False):
+    def __init__(self, content, ouput_prefix="css", xhtml=False, media_url=settings.MEDIA_URL):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.filters = settings.COMPRESS_CSS_FILTERS
         self.type = 'css'
-        super(CssCompressor, self).__init__(content, ouput_prefix, xhtml)
+        super(CssCompressor, self).__init__(content, ouput_prefix, xhtml, media_url)
     
     @staticmethod
     def compile(filename,compiler):
@@ -283,12 +284,12 @@ class CssCompressor(Compressor):
     
 class JsCompressor(Compressor):
 
-    def __init__(self, content, ouput_prefix="js", xhtml=False):
+    def __init__(self, content, ouput_prefix="js", xhtml=False, media_url=settings.MEDIA_URL):
         self.extension = ".js"
         self.template_name = "compressor/js.html"
         self.filters = settings.COMPRESS_JS_FILTERS
         self.type = 'js'
-        super(JsCompressor, self).__init__(content, ouput_prefix, xhtml)
+        super(JsCompressor, self).__init__(content, ouput_prefix, xhtml, media_url)
 
     def split_contents(self):
         """ Iterates over the elements in the block """
