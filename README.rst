@@ -128,20 +128,20 @@ If this seems a little hacky, it's because I wanted to make it easy to use whate
 `COMPRESS_OUTPUT_DIR` default: `"CACHE"`
   Controls the directory inside `COMPRESS_ROOT` that compressed files will
   be written to.
+ 
+`ABSOLUTE_CSS_URLS` default: `True`
+  If True, all relative url() bits specified in linked CSS files are automatically
+  converted to absolute URLs while being processed. Any local absolute urls (those
+  starting with a '/') are left alone.
 
 
 Notes
 *****
 
-All relative url() bits specified in linked CSS files are automatically
-converted to absolute URLs while being processed. Any local absolute urls (those
-starting with a '/') are left alone.
-
 Stylesheets that are @import'd are not compressed into the main file. They are
 left alone.
 
-Set the media attribute as normal on your <style> and <link> elements and
-the combined CSS will be wrapped in @media blocks as necessary.
+If the media attribute is set on <style> and <link> elements, a separate compressed file is created and linked for each media value you specified. This allows the media attribute to remain on the generated link element, instead of wrapping your CSS with @media blocks (which can break your own @media queries or @font-face declarations). It also allows browsers to avoid downloading CSS for irrelevant media types.
 
 Linked files must be on your COMPRESS_URL (which defaults to MEDIA_URL).
 If DEBUG is true off-site files will throw exceptions. If DEBUG is false

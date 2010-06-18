@@ -4,19 +4,16 @@ import subprocess
 from BeautifulSoup import BeautifulSoup
 from tempfile import NamedTemporaryFile
 from textwrap import dedent
-try:
-    from hashlib import sha1
-except ImportError:
-    from sha import new as sha1
+
 from django import template
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.utils.encoding import smart_str
 
 from compressor.conf import settings
 from compressor import filters
+from compressor.utils import get_hexdigest
 
 
 register = template.Library()
@@ -25,10 +22,6 @@ register = template.Library()
 class UncompressableFileError(Exception):
     pass
 
-
-def get_hexdigest(plaintext):
-    p = smart_str(plaintext)
-    return sha1(p).hexdigest()
 
 def exe_exists(program):
 
@@ -115,7 +108,6 @@ class Compressor(object):
         return "\n".join(self.hunks)
 
     def filter(self, content, method, **kwargs):
-        content = content
         for f in self.filters:
             filter = getattr(filters.get_class(f)(content, filter_type=self.type), method)
             try:
@@ -185,8 +177,7 @@ class CssCompressor(Compressor):
     def __init__(self, content, ouput_prefix="css", xhtml=False):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
-        self.filters = ['compressor.filters.css_default.CssAbsoluteFilter', 'compressor.filters.css_default.CssMediaFilter']
-        self.filters.extend(settings.COMPRESS_CSS_FILTERS)
+        self.filters = settings.COMPRESS_CSS_FILTERS
         self.type = 'css'
         super(CssCompressor, self).__init__(content, ouput_prefix, xhtml)
     

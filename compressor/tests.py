@@ -15,7 +15,7 @@ class CompressorTestCase(TestCase):
     def setUp(self):
         self.TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "testing")
         settings.MEDIA_ROOT = os.path.join(self.TEST_DIR, 'media')
-        settings.COMPRESS_CSS_FILTERS = []
+        settings.COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
         settings.COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
 
         
@@ -180,8 +180,8 @@ class CssAbsolutizingTestCase(TestCase):
         self.assertEqual(output, filter.input(filename=filename))
 
     def test_css_hunks(self):
-        out = [u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
-               u"p { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\np { background: url('/media/images/test.png'); }\n",
+        out = [u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n", 
+               u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n"
                ]
         self.assertEqual(out, self.cssNode.hunks)
 
@@ -196,7 +196,7 @@ class CssMediaTestCase(TestCase):
         self.cssNode = CssCompressor(self.css)
 
     def test_css_output(self):
-        out = u'@media screen {body { background:#990; }}\n@media print {p { border:5px solid green;}}\n@media all {body { color:#fff; }}'
+        out = u'body { background:#990; }\np { border:5px solid green;}\nbody { color:#fff; }'
         self.assertEqual(out, self.cssNode.combined)
 
 
@@ -218,7 +218,7 @@ class TemplatetagTestCase(TestCase):
         {% endcompress %}
         """
         context = { 'MEDIA_URL': settings.MEDIA_URL }
-        out = u'<link rel="stylesheet" href="/media/CACHE/css/32896eb8bce1.css" type="text/css">'
+        out = u'<link rel="stylesheet" href="/media/CACHE/css/f7c661b7a124.css" type="text/css">'
         self.assertEqual(out, self.render(template, context))
 
     def test_js_tag(self):
