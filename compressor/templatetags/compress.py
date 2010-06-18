@@ -1,6 +1,5 @@
 from django import template
 from django.core.cache import cache
-from django.template.loader import render_to_string
 
 try:
     from django.contrib.sites.models import Site
@@ -26,8 +25,10 @@ class CompressorNode(template.Node):
             compressor = CssCompressor(content, xhtml=self.xhtml)
         if self.kind == 'js':
             compressor = JsCompressor(content, xhtml=self.xhtml)
-        output = cache.get(compressor.cachekey)
-        if output is None:
+        in_cache = cache.get(compressor.cachekey)
+        if in_cache:
+            return in_cache
+        else:
             # do this to prevent dog piling
             in_progress_key = '%s.django_css.in_progress.%s' % (DOMAIN, compressor.cachekey)
             added_to_cache = cache.add(in_progress_key, True, 300)
@@ -39,9 +40,6 @@ class CompressorNode(template.Node):
                 while cache.get(in_progress_key):
                     sleep(0.1)
                 output = cache.get(compressor.cachekey)
-        if settings.COMPRESS:
-            return render_to_string(compressor.template_name, {'filepath':output, 'xhtml':self.xhtml}, context)
-        else:
             return output
 
 @register.tag

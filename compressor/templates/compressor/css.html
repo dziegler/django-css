@@ -1,1 +1,5 @@
-<link rel="stylesheet" href="{{ MEDIA_URL }}{{ filepath }}" type="text/css" {% if xhtml %}/>{% else %}>{% endif %}
+{% if xhtml %}
+<link rel="stylesheet" href="{{ url }}" type="text/css" />
+{% else %}
+<link rel="stylesheet" href="{{ url }}" type="text/css">
+{% endif %}
