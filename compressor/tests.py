@@ -1,24 +1,28 @@
 import os
 import re
+from copy import copy
 from textwrap import dedent
 from BeautifulSoup import BeautifulSoup
 
-from django.conf import settings as django_settings
 from django.template import Template, Context
 from django.test import TestCase
 
 from compressor import CssCompressor, JsCompressor, UncompressableFileError
 from compressor.conf import settings
 
-class CompressorTestCase(TestCase):
-
+class BaseTestCase(TestCase):
+    
+    def tearDown(self):
+        for k, v in self.old_settings.iteritems():
+            setattr(settings, k, v)
+    
     def setUp(self):
+        self.old_settings = copy(settings.__dict__)
         self.TEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "testing")
         settings.MEDIA_ROOT = os.path.join(self.TEST_DIR, 'media')
+        settings.MEDIA_URL = '/media/'
         settings.COMPRESS_CSS_FILTERS = ['compressor.filters.css_default.CssAbsoluteFilter']
         settings.COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
-
-        
         settings.COMPRESS = True
         settings.COMPILER_FORMATS = {
             '.ccss': {
@@ -26,6 +30,14 @@ class CompressorTestCase(TestCase):
                 'arguments': '*.ccss'
             },
         }
+        
+
+class CompressorTestCase(BaseTestCase):
+    
+    def setUp(self):
+        super(CompressorTestCase, self).setUp()
+        
+        
         self.ccssFile = os.path.join(settings.MEDIA_ROOT, u'css/three.css')
         self.css = dedent("""
         <link rel="stylesheet" href="/media/css/one.css" type="text/css">
@@ -157,8 +169,10 @@ class CompressorTestCase(TestCase):
         self.assertEqual(output, self.jsNode.output())
 
 
-class CssAbsolutizingTestCase(TestCase):
+class CssAbsolutizingTestCase(BaseTestCase):
+
     def setUp(self):
+        super(CssAbsolutizingTestCase, self).setUp()
         settings.COMPRESS = True
         settings.MEDIA_URL = '/media/'
         self.css = """
@@ -192,8 +206,9 @@ class CssAbsolutizingTestCase(TestCase):
         self.assertEqual(out, self.cssNode.hunks)
 
 
-class CssMediaTestCase(TestCase):
+class CssMediaTestCase(BaseTestCase):
     def setUp(self):
+        super(CssMediaTestCase, self).setUp()
         self.css = """
         <link rel="stylesheet" href="/media/css/one.css" type="text/css" media="screen">
         <style type="text/css" media="print">p { border:5px solid green;}</style>
@@ -206,7 +221,7 @@ class CssMediaTestCase(TestCase):
         self.assertEqual(out, self.cssNode.combined)
 
 
-class TemplatetagTestCase(TestCase):
+class TemplatetagTestCase(BaseTestCase):
     def render(self, template_string, context_dict=None):
         """A shortcut for testing template output."""
         if context_dict is None:
