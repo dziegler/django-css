@@ -1,3 +1,4 @@
 *CACHE*
 dist
 MANIFEST
+*.pyc
