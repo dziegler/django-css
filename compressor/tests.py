@@ -9,6 +9,7 @@ from django.test import TestCase
 
 from compressor import CssCompressor, JsCompressor, UncompressableFileError
 from compressor.conf import settings
+from compressor.utils import get_file_hash
 
 class BaseTestCase(TestCase):
     
@@ -53,7 +54,6 @@ class CompressorTestCase(BaseTestCase):
         "</style>"))
         self.css_hash = "1ff892c21b66"
         self.js_hash = "3f33b9146e12"
-        
         self.cssNode = CssCompressor(self.css)
 
         self.js = """
@@ -179,6 +179,8 @@ class CssAbsolutizingTestCase(BaseTestCase):
         <link rel="stylesheet" href="/media/css/url/url1.css" type="text/css">
         <link rel="stylesheet" href="/media/css/url/2/url2.css" type="text/css">
         """
+        self.url1_hash = get_file_hash(u'css/url/url1.css')
+        self.url2_hash = get_file_hash(u'css/url/2/url2.css')
         self.cssNode = CssCompressor(self.css)
 
     def test_css_absolute_filter(self):
@@ -200,8 +202,8 @@ class CssAbsolutizingTestCase(BaseTestCase):
         self.assertEqual(output, filter.input(filename=filename, media_url=settings.MEDIA_URL))
         
     def test_css_hunks(self):
-        out = [u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n", 
-               u"p { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\np { background: url('/media/images/test.png?f88906332eaa'); }\n"
+        out = ["p { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\n" % ((self.url1_hash,)*4), 
+               "p { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\np { background: url('/media/images/test.png?%s'); }\n" % ((self.url2_hash,)*4)
                ]
         self.assertEqual(out, self.cssNode.hunks)
 

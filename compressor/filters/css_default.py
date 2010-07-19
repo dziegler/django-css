@@ -4,7 +4,7 @@ import posixpath
 
 from compressor.filters import FilterBase, FilterError
 from compressor.conf import settings
-from compressor.utils import get_hexdigest
+from compressor.utils import get_file_hash
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
@@ -19,11 +19,7 @@ class CssAbsoluteFilter(FilterBase):
         self.media_path = filename[len(media_root):]
         self.media_path = self.media_path.lstrip('/')
         self.media_url = media_url.rstrip('/')
-        try:
-            mtime = os.path.getmtime(filename)
-            self.mtime = get_hexdigest(str(int(mtime)))[:12]
-        except OSError:
-            self.mtime = None
+        self.mtime = get_file_hash(filename)
         self.has_http = False
         if self.media_url.startswith('http://') or self.media_url.startswith('https://'):
             self.has_http = True
