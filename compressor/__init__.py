@@ -116,7 +116,10 @@ class Compressor(object):
                     content = filter(media_url=self.media_url, **kwargs)
             except NotImplementedError:
                 pass
-        return str(content)
+        if type(content) == str:
+            return content
+        else:
+            return unicode(content).encode('utf-8')
 
     @property
     def combined(self):
