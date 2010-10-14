@@ -41,13 +41,13 @@ def exe_exists(program):
 
 class Compressor(object):
 
-    def __init__(self, content, ouput_prefix="compressed", xhtml=False, media_url=settings.MEDIA_URL):
+    def __init__(self, content, ouput_prefix="compressed", xhtml=False, media_url=None):
         self.content = content
         self.ouput_prefix = ouput_prefix
         self.split_content = []
         self.soup = BeautifulSoup(self.content)
         self.xhtml = xhtml
-        self.media_url = media_url
+        self.media_url = media_url or settings.MEDIA_URL
         try:
           from django.contrib.sites.models import Site
           self.domain = Site.objects.get_current().domain
@@ -178,7 +178,7 @@ class Compressor(object):
 
 class CssCompressor(Compressor):
 
-    def __init__(self, content, ouput_prefix="css", xhtml=False, media_url=settings.MEDIA_URL):
+    def __init__(self, content, ouput_prefix="css", xhtml=False, media_url=None):
         self.extension = ".css"
         self.template_name = "compressor/css.html"
         self.filters = settings.COMPRESS_CSS_FILTERS
@@ -287,7 +287,7 @@ class CssCompressor(Compressor):
     
 class JsCompressor(Compressor):
 
-    def __init__(self, content, ouput_prefix="js", xhtml=False, media_url=settings.MEDIA_URL):
+    def __init__(self, content, ouput_prefix="js", xhtml=False, media_url=None):
         self.extension = ".js"
         self.template_name = "compressor/js.html"
         self.filters = settings.COMPRESS_JS_FILTERS
