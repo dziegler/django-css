@@ -10,7 +10,8 @@ URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
 
 class CssAbsoluteFilter(FilterBase):
-    def input(self, filename=None, media_url=settings.MEDIA_URL, **kwargs):
+    def input(self, filename=None, media_url=None, **kwargs):
+        media_url = media_url or settings.MEDIA_URL
         media_root = os.path.abspath(settings.MEDIA_ROOT)
         if filename is not None:
             filename = os.path.abspath(filename)
