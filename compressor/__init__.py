@@ -64,9 +64,10 @@ class Compressor(object):
     def get_filename(self, url):
         if not url.startswith(self.media_url):
             raise UncompressableFileError('"%s" is not in COMPRESS_URL ("%s") and can not be compressed' % (url, self.media_url))
+        url = os.path.realpath(url)
         basename = url[len(self.media_url):]
         filename = os.path.join(settings.MEDIA_ROOT, basename)
-        return filename
+        return os.path.realpath(filename)
 
     @property
     def mtimes(self):
