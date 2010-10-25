@@ -1,5 +1,4 @@
 import os
-from operator import concat
 from optparse import make_option, OptionError
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -45,22 +44,14 @@ class Command(BaseCommand):
         # Find all files in MEDIA_ROOT that have a COMPILER_FORMATS-supported
         # extension, and return them as a list of (full path to file without
         # extension, extension) tuples.
-        files_to_compile = reduce(
-            concat,
-            map(
-                lambda(root, dirs, files): map(
-                    lambda (css_file, extension): ('%s/%s' % (root, css_file), extension),
-                    filter(
-                        bool,
-                        map(
-                            lambda media_file: reduce(
-                                lambda prev, next: prev or media_file.endswith(next) \
-                                    and (media_file[:-len(next)], next),
-                                settings.COMPILER_FORMATS.keys(),
-                                False),
-                            files))),
-                os.walk(settings.MEDIA_ROOT)))
-        
+        files_to_compile = []
+        for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+            for _dir in dirs:
+                for _file in files:
+                    name, ext = os.path.splitext(_file)
+                    if ext in settings.COMPILER_FORMATS:
+                        files_to_compile.append((os.path.join(root, name), ext))
+            
         if verbosity:
             print 'Found %s files to be slated...' % len(files_to_compile)
         
