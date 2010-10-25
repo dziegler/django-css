@@ -6,3 +6,6 @@ django-compress was originally created by Andreas Pelme <andreas@pelme.se> in 20
 The Python-version of jsmin (http://www.crockford.com/javascript/jsmin.html) 
 is included in django-css. It was translated from to Python by Baruch 
 Evan, from the original jsmin implementation by Douglas Crockford.
+
+Contributors:
+Aram Dulyan
