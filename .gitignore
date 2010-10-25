@@ -2,3 +2,5 @@
 dist
 MANIFEST
 *.pyc
+django_css.egg-info/
+
