@@ -1,3 +1,4 @@
+
 Django css
 =================
 
@@ -16,7 +17,6 @@ Django-css is a fork of django_compressor_ that makes it easy to use CSS compile
 .. _Sass: http://haml.hamptoncatlin.com/docs/rdoc/classes/Sass.html
 .. _CleverCSS: http://github.com/dziegler/clevercss/tree/master 
 .. _LESS: http://lesscss.org/
-.. _django_compressor: https://github.com/jezdez/django_compressor 
 
 Thanks to django_compressor, django-css will also version and compress linked and inline javascript or CSS into a single cached file. These cached files will get served through whatever frontend server you use for serving static files, because serving static files through Django is just silly.
 
@@ -173,7 +173,7 @@ Changes from 1.0.0, aka the version from google code
 Django-css was previously using django-compress_ for versioning and compression, and it now uses django_compressor_. The main reasons being that with django_compressor, css/js files are included in the template itself, not in settings, and versioning is much cleaner. Version 2 requires much less setup and is easier to use, but is not compatible with version 1.
 
 .. _django-compress: http://code.google.com/p/django-compress/
-.. _django_compressor: http://github.com/mintchaos/django_compressor/tree/master 
+.. _django_compressor: https://github.com/jezdez/django_compressor/
 
 Special thanks to Christian Metts and Andreas Pelme for all their hard work on django_compressor and django-compress.
 
