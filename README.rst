@@ -1,6 +1,14 @@
 Django css
 =================
 
+...is dead.
+=================
+Since django_compressor_ now does everything django-css does and is more actively maintained, I'm recommending that people migrate to it. More info here_.
+
+.. _here: http://blog.davidziegler.net/post/7617900947/django-css-is-dead-long-live-django-compressor
+
+------------
+
 Django-css is a fork of django_compressor_ that makes it easy to use CSS compilers with your Django projects. CSS compilers extend CSS syntax to include more powerful features such as variables and nested blocks, and pretty much rock_ all around. Django-css can currently be used with any CSS compiler that can be called from the command line, such as HSS_, Sass_, CleverCSS_, or LESS_.
 
 .. _rock: http://blog.davidziegler.net/post/92203003/css-compilers-rock
